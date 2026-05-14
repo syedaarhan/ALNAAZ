@@ -4,15 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-
-import appCss from "../styles.css?url";
-import logoUrl from "@/assets/logo.png?url";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { cn } from "@/lib/utils";
 
 function NotFoundComponent() {
   return (
@@ -72,51 +65,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Al Naaz — Royal Indian Fine Dining" },
-      { name: "description", content: "Al Naaz is a luxury Indian fine dining restaurant blending royal heritage cuisine with cinematic modern elegance." },
-      { name: "author", content: "Al Naaz Fine Dining" },
-      { property: "og:title", content: "Al Naaz — Royal Indian Fine Dining" },
-      { property: "og:description", content: "A heritage of flavour & finesse. Reserve your evening at Al Naaz." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@AlNaazDining" },
-      { name: "keywords", content: "Indian fine dining, luxury restaurant, Hyderabad, catering, biryani" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      {
-        rel: "icon",
-        type: "image/png",
-        href: logoUrl,
-      },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
-
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en" className="dark">
-      <head>
-        <HeadContent />
-      </head>
-      <body className="grain">
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -124,7 +76,9 @@ function RootComponent() {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <Outlet />
+        <div className="grain min-h-screen">
+          <Outlet />
+        </div>
       </QueryClientProvider>
     </ThemeProvider>
   );

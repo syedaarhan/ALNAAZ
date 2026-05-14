@@ -13,19 +13,6 @@ import { Footer } from "@/components/Footer";
 import { useReveal } from "@/hooks/use-reveal";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Al Naaz — Royal Indian Fine Dining" },
-      { name: "description", content: "Al Naaz is a luxury Indian fine dining restaurant blending royal heritage cuisine with cinematic modern elegance. Reserve your evening." },
-      { property: "og:title", content: "Al Naaz — Royal Indian Fine Dining" },
-      { property: "og:description", content: "A heritage of flavour & finesse. Reserve your evening at Al Naaz." },
-    ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" },
-    ],
-  }),
   component: Index,
 });
 
