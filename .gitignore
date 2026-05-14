@@ -30,3 +30,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+server_output.txt
