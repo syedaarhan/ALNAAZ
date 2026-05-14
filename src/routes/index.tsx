@@ -42,9 +42,9 @@ function Index() {
     "telephone": "+91 98765 43210",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "12 Heritage Mile, Banjara Hills",
-      "addressLocality": "Hyderabad",
-      "postalCode": "500034",
+      "streetAddress": "Robertsonpet Road, Oorgaumpet",
+      "addressLocality": "KGF",
+      "postalCode": "563121",
       "addressCountry": "IN"
     },
     "geo": {
