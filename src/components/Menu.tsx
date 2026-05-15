@@ -26,6 +26,22 @@ export function Menu() {
       }
     };
     fetchMenu();
+
+    // Auto-refresh when admin panel updates menu in another tab
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "alnaaz_menu") fetchMenu();
+    };
+    // Also refresh when user switches back to this tab
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") fetchMenu();
+    };
+
+    window.addEventListener("storage", onStorage);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   const filtered = useMemo(() => {
