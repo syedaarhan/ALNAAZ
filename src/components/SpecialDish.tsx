@@ -26,7 +26,8 @@ export function SpecialDish() {
           <div className="gold-divider my-8 w-32" />
           <p className="text-base leading-relaxed text-muted-foreground md:text-lg">
             Aged basmati layered with spice-infused lamb, sealed in a copper handi and slow-cooked
-            on coals for four hours. Unveiled at your table — a moment of theatre, a taste of history.
+            on coals for four hours. Unveiled at your table — a moment of theatre, a taste of
+            history.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-6">
             <a
@@ -38,7 +39,9 @@ export function SpecialDish() {
             </a>
             <div>
               <div className="font-display text-3xl text-gradient-gold">₹ 720</div>
-              <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Serves Two</div>
+              <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                Serves Two
+              </div>
             </div>
           </div>
         </div>

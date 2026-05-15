@@ -97,14 +97,10 @@ function AdminLogin() {
             disabled={isLoading}
             className={cn(
               "group mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-all hover:gold-glow disabled:opacity-70 disabled:cursor-not-allowed",
-              isLoading && "animate-pulse"
+              isLoading && "animate-pulse",
             )}
           >
-            {isLoading ? (
-              <>Authenticating...</>
-            ) : (
-              <>Authenticate ✦</>
-            )}
+            {isLoading ? <>Authenticating...</> : <>Authenticate ✦</>}
           </button>
         </form>
 

@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { CalendarDays, Clock, Sparkles, Users, CheckCircle, AlertCircle, User, Phone } from "lucide-react";
+import {
+  CalendarDays,
+  Clock,
+  Sparkles,
+  Users,
+  CheckCircle,
+  AlertCircle,
+  User,
+  Phone,
+} from "lucide-react";
 import about from "@/assets/about.jpg";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +52,7 @@ export function Reservation() {
     selectedDate.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (selectedDate < today) {
       newErrors.date = "Date cannot be in the past";
     }
@@ -127,7 +136,12 @@ export function Reservation() {
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field label="Full Name" error={errors.name}>
-              <div className={cn("input-luxury flex items-center gap-3", errors.name ? "border-red-500" : "")}>
+              <div
+                className={cn(
+                  "input-luxury flex items-center gap-3",
+                  errors.name ? "border-red-500" : "",
+                )}
+              >
                 <User className="h-4 w-4 shrink-0 text-primary" />
                 <input
                   required
@@ -140,7 +154,12 @@ export function Reservation() {
               </div>
             </Field>
             <Field label="Phone" error={errors.phone}>
-              <div className={cn("input-luxury flex items-center gap-3", errors.phone ? "border-red-500" : "")}>
+              <div
+                className={cn(
+                  "input-luxury flex items-center gap-3",
+                  errors.phone ? "border-red-500" : "",
+                )}
+              >
                 <Phone className="h-4 w-4 shrink-0 text-primary" />
                 <input
                   required
@@ -153,7 +172,12 @@ export function Reservation() {
               </div>
             </Field>
             <Field label="Date" error={errors.date}>
-              <div className={cn("input-luxury flex items-center gap-3", errors.date ? "border-red-500" : "")}>
+              <div
+                className={cn(
+                  "input-luxury flex items-center gap-3",
+                  errors.date ? "border-red-500" : "",
+                )}
+              >
                 <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
                 <input
                   required
@@ -165,7 +189,12 @@ export function Reservation() {
               </div>
             </Field>
             <Field label="Time" error={errors.time}>
-              <div className={cn("input-luxury flex items-center gap-3", errors.time ? "border-red-500" : "")}>
+              <div
+                className={cn(
+                  "input-luxury flex items-center gap-3",
+                  errors.time ? "border-red-500" : "",
+                )}
+              >
                 <Clock className="h-4 w-4 shrink-0 text-primary" />
                 <input
                   required
@@ -184,7 +213,15 @@ export function Reservation() {
                   onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
                   className="w-full bg-transparent outline-none appearance-none"
                 >
-                  {[1,2,3,4,5,6,7,8,"9+"].map((n)=>(<option key={String(n)} value={String(n)} className="bg-background text-foreground">{n} {Number(n)===1?"Guest":"Guests"}</option>))}
+                  {[1, 2, 3, 4, 5, 6, 7, 8, "9+"].map((n) => (
+                    <option
+                      key={String(n)}
+                      value={String(n)}
+                      className="bg-background text-foreground"
+                    >
+                      {n} {Number(n) === 1 ? "Guest" : "Guests"}
+                    </option>
+                  ))}
                 </select>
               </div>
             </Field>
@@ -203,7 +240,11 @@ export function Reservation() {
             disabled={loading}
             className="group mt-7 inline-flex w-full items-center justify-center gap-3 rounded-full bg-primary px-8 py-4 text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-all duration-500 hover:gold-glow disabled:opacity-75 disabled:cursor-not-allowed"
           >
-            {loading ? "Processing..." : submitted ? "Reservation Received ✦" : "Confirm Reservation"}
+            {loading
+              ? "Processing..."
+              : submitted
+                ? "Reservation Received ✦"
+                : "Confirm Reservation"}
           </button>
         </form>
       </div>
@@ -247,7 +288,17 @@ export function Reservation() {
   );
 }
 
-function Field({ label, children, className = "", error }: { label: string; children: React.ReactNode; className?: string; error?: string }) {
+function Field({
+  label,
+  children,
+  className = "",
+  error,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+  error?: string;
+}) {
   return (
     <div className={`block ${className}`}>
       <span className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -260,7 +311,13 @@ function Field({ label, children, className = "", error }: { label: string; chil
   );
 }
 
-function Bullet({ icon: Icon, children }: { icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
+function Bullet({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex items-center gap-3">
       <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-primary">

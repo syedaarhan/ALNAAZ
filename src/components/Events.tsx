@@ -1,10 +1,30 @@
 import { ArrowUpRight, Building2, Cake, HeartHandshake, Users2 } from "lucide-react";
 
 const events = [
-  { icon: HeartHandshake, title: "Wedding Catering", text: "Bespoke royal banquets for the most cherished evening of your life.", img: "from-rose-500/20 to-amber-500/10" },
-  { icon: Cake, title: "Birthday Soirées", text: "Intimate celebrations elevated by personal menus and golden touches.", img: "from-amber-500/20 to-yellow-500/10" },
-  { icon: Building2, title: "Corporate Dining", text: "Refined private rooms for conversations that move worlds forward.", img: "from-stone-500/20 to-amber-500/10" },
-  { icon: Users2, title: "Family Gatherings", text: "Long tables, warm lights, and dishes that feel like home — only finer.", img: "from-amber-600/20 to-orange-500/10" },
+  {
+    icon: HeartHandshake,
+    title: "Wedding Catering",
+    text: "Bespoke royal banquets for the most cherished evening of your life.",
+    img: "from-rose-500/20 to-amber-500/10",
+  },
+  {
+    icon: Cake,
+    title: "Birthday Soirées",
+    text: "Intimate celebrations elevated by personal menus and golden touches.",
+    img: "from-amber-500/20 to-yellow-500/10",
+  },
+  {
+    icon: Building2,
+    title: "Corporate Dining",
+    text: "Refined private rooms for conversations that move worlds forward.",
+    img: "from-stone-500/20 to-amber-500/10",
+  },
+  {
+    icon: Users2,
+    title: "Family Gatherings",
+    text: "Long tables, warm lights, and dishes that feel like home — only finer.",
+    img: "from-amber-600/20 to-orange-500/10",
+  },
 ];
 
 export function Events() {
@@ -26,7 +46,9 @@ export function Events() {
               className="hover-lift group relative overflow-hidden rounded-3xl glass-strong p-7"
               style={{ animation: `fade-up 0.7s cubic-bezier(0.22,1,0.36,1) ${i * 90}ms both` }}
             >
-              <div className={`absolute -inset-px rounded-3xl bg-gradient-to-br ${e.img} opacity-60`} />
+              <div
+                className={`absolute -inset-px rounded-3xl bg-gradient-to-br ${e.img} opacity-60`}
+              />
               <div className="relative">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
                   <e.icon className="h-6 w-6" />

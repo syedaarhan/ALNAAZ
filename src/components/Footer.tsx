@@ -27,7 +27,9 @@ export function Footer() {
             <div className="h-14 w-14 overflow-hidden rounded-full border border-primary/20">
               <img src={logo} alt="Al Naaz Logo" className="h-full w-full object-cover" />
             </div>
-            <div className="font-display text-3xl tracking-[0.2em] text-gradient-gold">AL&nbsp;NAAZ</div>
+            <div className="font-display text-3xl tracking-[0.2em] text-gradient-gold">
+              AL&nbsp;NAAZ
+            </div>
           </div>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
             Where every plate tells the story of an empire. A modern temple to the ancient art of
@@ -50,7 +52,9 @@ export function Footer() {
         </div>
 
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">Explore</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+            Explore
+          </p>
           <ul className="mt-4 space-y-2 text-sm">
             {links.map((l) => (
               <li key={l.href}>
@@ -66,7 +70,9 @@ export function Footer() {
         </div>
 
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">Visit</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+            Visit
+          </p>
           <ul className="mt-4 space-y-2 text-sm text-foreground/80">
             <li>Robertsonpet Road</li>
             <li>Oorgaumpet, KGF</li>
@@ -76,7 +82,10 @@ export function Footer() {
               </a>
             </li>
             <li>
-              <a href="mailto:concierge@alnaaz.com" className="hover:text-foreground transition-colors">
+              <a
+                href="mailto:concierge@alnaaz.com"
+                className="hover:text-foreground transition-colors"
+              >
                 concierge@alnaaz.com
               </a>
             </li>

@@ -26,7 +26,7 @@ export function Navbar() {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
           setScrolled(currentScrollY > 40);
-          
+
           const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
           setProgress(totalHeight > 0 ? (currentScrollY / totalHeight) * 100 : 0);
           ticking = false;
@@ -58,11 +58,11 @@ export function Navbar() {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        scrolled ? "py-3" : "py-6"
+        scrolled ? "py-3" : "py-6",
       )}
     >
       {/* Scroll Progress Indicator */}
-      <div 
+      <div
         className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent transition-all duration-300"
         style={{ width: `${progress}%` }}
       />
@@ -72,7 +72,7 @@ export function Navbar() {
           "mx-auto flex max-w-7xl items-center justify-between px-6 transition-all duration-500",
           scrolled
             ? "glass-strong rounded-full luxury-shadow mx-4 md:mx-auto py-2.5"
-            : "bg-transparent py-2"
+            : "bg-transparent py-2",
         )}
       >
         <a href="#home" className="group flex items-center gap-3" aria-label="Al Naaz Home">
@@ -113,7 +113,7 @@ export function Navbar() {
         className={cn(
           "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden",
           "transition-all duration-500",
-          open ? "opacity-100" : "pointer-events-none opacity-0"
+          open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={() => setOpen(false)}
       />
@@ -123,7 +123,7 @@ export function Navbar() {
           "fixed inset-x-4 top-[88px] z-50 origin-top rounded-3xl glass-strong luxury-shadow lg:hidden",
           "transition-all duration-500",
           open ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0",
-          scrolled ? "top-[72px]" : "top-[88px]"
+          scrolled ? "top-[72px]" : "top-[88px]",
         )}
         role="navigation"
         aria-label="Mobile navigation"

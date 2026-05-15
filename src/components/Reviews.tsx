@@ -40,16 +40,6 @@ export function Reviews() {
     return () => clearInterval(t);
   }, [autoplay]);
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goToPrevious();
-      if (e.key === "ArrowRight") goToNext();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
   const goToNext = useCallback(() => {
     setI((v) => (v + 1) % reviews.length);
     setAutoplay(false);
@@ -59,6 +49,16 @@ export function Reviews() {
     setI((v) => (v - 1 + reviews.length) % reviews.length);
     setAutoplay(false);
   }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") goToPrevious();
+      if (e.key === "ArrowRight") goToNext();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goToNext, goToPrevious]);
 
   return (
     <section id="reviews" className="relative py-28 md:py-36">
@@ -82,13 +82,13 @@ export function Reviews() {
               key={r.id}
               className={cn(
                 "absolute inset-0 glass-strong rounded-3xl p-10 luxury-shadow transition-all duration-700 md:p-14",
-                idx === i ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
+                idx === i
+                  ? "translate-y-0 opacity-100"
+                  : "pointer-events-none translate-y-6 opacity-0",
               )}
             >
               <Quote className="h-10 w-10 text-primary/70" />
-              <p className="mt-6 font-display text-2xl leading-snug md:text-3xl">
-                "{r.text}"
-              </p>
+              <p className="mt-6 font-display text-2xl leading-snug md:text-3xl">"{r.text}"</p>
               <div className="mt-8 flex items-center gap-4">
                 <img
                   src={r.avatar}
@@ -98,7 +98,9 @@ export function Reviews() {
                 />
                 <div>
                   <div className="font-display text-lg">{r.name}</div>
-                  <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{r.role}</div>
+                  <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                    {r.role}
+                  </div>
                 </div>
                 <div className="ml-auto flex gap-1 text-primary">
                   {Array.from({ length: r.rating }).map((_, k) => (
@@ -130,7 +132,7 @@ export function Reviews() {
                 }}
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-500",
-                  idx === i ? "w-10 bg-primary" : "w-4 bg-primary/30"
+                  idx === i ? "w-10 bg-primary" : "w-4 bg-primary/30",
                 )}
               />
             ))}

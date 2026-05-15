@@ -10,7 +10,9 @@ export function Menu() {
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState("All");
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "rating">("featured");
+  const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "rating">(
+    "featured",
+  );
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
 
   useEffect(() => {
@@ -42,8 +44,8 @@ export function Menu() {
     // Filter by search
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter((d) =>
-        d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q)
+      result = result.filter(
+        (d) => d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q),
       );
     }
 
@@ -107,7 +109,7 @@ export function Menu() {
                 "rounded-full px-6 py-2.5 text-xs uppercase tracking-[0.2em] transition-all duration-500",
                 active === c
                   ? "bg-primary text-primary-foreground gold-glow"
-                  : "glass text-foreground/70 hover:text-foreground"
+                  : "glass text-foreground/70 hover:text-foreground",
               )}
             >
               {c}
@@ -190,17 +192,24 @@ export function Menu() {
                       <h3 className="font-display text-xl">{d.name}</h3>
                       <span className="font-display text-lg text-gradient-gold">{d.price}</span>
                     </div>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">{d.desc}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                      {d.desc}
+                    </p>
                     <div className="mt-4 flex items-center justify-between">
                       <div className="flex items-center gap-1 text-primary">
                         {Array.from({ length: 5 }).map((_, k) => (
                           <Star
                             key={k}
-                            className={cn("h-4 w-4", k < Math.round(d.rating || 5) ? "fill-primary" : "opacity-30")}
+                            className={cn(
+                              "h-4 w-4",
+                              k < Math.round(d.rating || 5) ? "fill-primary" : "opacity-30",
+                            )}
                             aria-hidden="true"
                           />
                         ))}
-                        <span className="ml-2 text-xs text-muted-foreground">{(d.rating || 5).toFixed(1)}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {(d.rating || 5).toFixed(1)}
+                        </span>
                       </div>
                       {d.prepTime && (
                         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -213,7 +222,7 @@ export function Menu() {
                 </motion.article>
               ))
             ) : (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="col-span-full py-12 text-center text-muted-foreground"
@@ -231,15 +240,15 @@ export function Menu() {
           <Drawer.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
           <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 flex flex-col rounded-t-[32px] bg-background p-6 outline-none max-h-[92vh]">
             <div className="mx-auto mb-8 h-1.5 w-12 shrink-0 rounded-full bg-muted" />
-            
+
             {selectedDish && (
               <div className="mx-auto w-full max-w-2xl overflow-y-auto pb-8">
                 <div className="grid gap-8 md:grid-cols-2">
                   <div className="relative aspect-square overflow-hidden rounded-2xl luxury-shadow">
                     {selectedDish.img ? (
-                      <img 
-                        src={selectedDish.img} 
-                        alt={selectedDish.name} 
+                      <img
+                        src={selectedDish.img}
+                        alt={selectedDish.name}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -262,20 +271,32 @@ export function Menu() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col">
                     <div className="flex items-start justify-between gap-4">
                       <h3 className="font-display text-3xl leading-tight">{selectedDish.name}</h3>
-                      <span className="font-display text-2xl text-gradient-gold">{selectedDish.price}</span>
+                      <span className="font-display text-2xl text-gradient-gold">
+                        {selectedDish.price}
+                      </span>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="flex gap-0.5">
                           {Array.from({ length: 5 }).map((_, k) => (
-                            <Star key={k} className={cn("h-4 w-4", k < Math.round(selectedDish.rating || 5) ? "fill-primary text-primary" : "text-muted-foreground/30")} />
+                            <Star
+                              key={k}
+                              className={cn(
+                                "h-4 w-4",
+                                k < Math.round(selectedDish.rating || 5)
+                                  ? "fill-primary text-primary"
+                                  : "text-muted-foreground/30",
+                              )}
+                            />
                           ))}
                         </div>
-                        <span className="text-sm font-medium">{(selectedDish.rating || 5).toFixed(1)}</span>
+                        <span className="text-sm font-medium">
+                          {(selectedDish.rating || 5).toFixed(1)}
+                        </span>
                       </div>
                       {selectedDish.prepTime && (
                         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
@@ -284,28 +305,37 @@ export function Menu() {
                         </div>
                       )}
                     </div>
-                    
-                    <p className="mt-6 text-base leading-relaxed text-muted-foreground">{selectedDish.desc}</p>
-                    
+
+                    <p className="mt-6 text-base leading-relaxed text-muted-foreground">
+                      {selectedDish.desc}
+                    </p>
+
                     {selectedDish.ingredients && (
                       <div className="mt-8">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">Ingredients</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
+                          Ingredients
+                        </p>
                         <div className="mt-3 flex flex-wrap gap-2">
-                          {selectedDish.ingredients.map(ing => (
-                            <span key={ing} className="rounded-full glass px-3 py-1 text-xs text-foreground/80">{ing}</span>
+                          {selectedDish.ingredients.map((ing) => (
+                            <span
+                              key={ing}
+                              className="rounded-full glass px-3 py-1 text-xs text-foreground/80"
+                            >
+                              {ing}
+                            </span>
                           ))}
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="mt-10 grid grid-cols-2 gap-3">
-                      <button 
+                      <button
                         onClick={() => setSelectedDish(null)}
                         className="rounded-full glass-strong py-4 text-xs font-semibold uppercase tracking-[0.2em] transition-all hover:bg-white/5"
                       >
                         Close
                       </button>
-                      <a 
+                      <a
                         href="#reservation"
                         onClick={() => setSelectedDish(null)}
                         className="inline-flex items-center justify-center rounded-full bg-primary py-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-all hover:gold-glow hover:scale-[1.02] active:scale-[0.98]"

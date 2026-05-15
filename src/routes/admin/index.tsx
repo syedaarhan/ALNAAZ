@@ -1,25 +1,38 @@
 import { useState, useEffect, useTransition } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { 
-  Utensils, 
-  CalendarCheck, 
-  LogOut, 
-  Plus, 
-  Trash2, 
-  CheckCircle2, 
-  XCircle, 
+import {
+  Utensils,
+  CalendarCheck,
+  LogOut,
+  Plus,
+  Trash2,
+  CheckCircle2,
+  XCircle,
   Clock,
   TrendingUp,
   Users,
   RefreshCw,
   Loader2,
   ImagePlus,
-  Upload
+  Upload,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, deleteReservation, compressImage, clearCache, Dish, Reservation, categories } from "@/lib/data";
+import {
+  getMenu,
+  saveMenu,
+  deleteDishFromDb,
+  getReservations,
+  updateReservationStatus,
+  deleteReservation,
+  compressImage,
+  clearCache,
+  Dish,
+  Reservation,
+  categories,
+} from "@/lib/data";
 
-export const Route = createFileRoute("/admin/")(  {
+export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
 });
 
@@ -42,17 +55,14 @@ function AdminDashboard() {
     cat: "Starters",
     img: "",
     priceNum: 0,
-    rating: 5.0
+    rating: 5.0,
   };
   const [newDish, setNewDish] = useState<Partial<Dish>>(emptyDish);
 
   // Initial load — uses cache, doesn't lose data
   const loadData = async () => {
     setIsLoading(true);
-    const [menuData, resData] = await Promise.all([
-      getMenu(),
-      getReservations()
-    ]);
+    const [menuData, resData] = await Promise.all([getMenu(), getReservations()]);
     setDishes(menuData);
     setReservations(resData);
     setIsLoading(false);
@@ -62,10 +72,7 @@ function AdminDashboard() {
   const refreshData = async () => {
     setIsLoading(true);
     clearCache();
-    const [menuData, resData] = await Promise.all([
-      getMenu(),
-      getReservations()
-    ]);
+    const [menuData, resData] = await Promise.all([getMenu(), getReservations()]);
     setDishes(menuData);
     setReservations(resData);
     setIsLoading(false);
@@ -91,7 +98,7 @@ function AdminDashboard() {
   };
 
   const deleteDish = async (id: string) => {
-    const updated = dishes.filter(d => d.id !== id);
+    const updated = dishes.filter((d) => d.id !== id);
     setDishes(updated);
     const result = await deleteDishFromDb(id);
     if (!result.ok) {
@@ -124,16 +131,20 @@ function AdminDashboard() {
     setSaveError(null);
 
     const dish: Dish = {
-      ...newDish as Dish,
-      id: newDish.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || Math.random().toString(36).substr(2, 9),
-      priceNum: parseInt(newDish.price?.replace(/[^0-9]/g, '') || "0"),
+      ...(newDish as Dish),
+      id:
+        newDish.name
+          ?.toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9-]/g, "") || Math.random().toString(36).substr(2, 9),
+      priceNum: parseInt(newDish.price?.replace(/[^0-9]/g, "") || "0"),
       rating: newDish.rating || 5.0,
-      img: newDish.img || ""
+      img: newDish.img || "",
     };
-    
+
     const updated = [...dishes, dish];
     setDishes(updated);
-    
+
     const result = await saveMenu(updated);
     setIsSaving(false);
 
@@ -148,8 +159,8 @@ function AdminDashboard() {
 
   const handleStatusChange = async (id: string, status: Reservation["status"]) => {
     // Optimistic update
-    setReservations(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-    
+    setReservations((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+
     const result = await updateReservationStatus(id, status);
     if (!result.ok) {
       setSaveError(result.error || "Failed to update status.");
@@ -163,7 +174,7 @@ function AdminDashboard() {
 
   const handleDeleteReservation = async (id: string) => {
     if (!confirm("Delete this reservation?")) return;
-    setReservations(prev => prev.filter(r => r.id !== id));
+    setReservations((prev) => prev.filter((r) => r.id !== id));
     const result = await deleteReservation(id);
     if (!result.ok) {
       setSaveError("Failed to delete reservation.");
@@ -184,70 +195,99 @@ function AdminDashboard() {
     <div className="flex min-h-screen bg-background">
       {/* Add Dish Modal */}
       {isAdding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-6" onClick={() => setIsAdding(false)}>
-          <div className="glass-strong w-full max-w-lg rounded-3xl p-8 luxury-shadow" onClick={e => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-6"
+          onClick={() => setIsAdding(false)}
+        >
+          <div
+            className="glass-strong w-full max-w-lg rounded-3xl p-8 luxury-shadow"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-display">New Culinary Creation</h2>
-              <button onClick={() => setIsAdding(false)} className="p-2 hover:bg-white/5 rounded-full text-muted-foreground"><XCircle className="h-6 w-6" /></button>
+              <button
+                onClick={() => setIsAdding(false)}
+                className="p-2 hover:bg-white/5 rounded-full text-muted-foreground"
+              >
+                <XCircle className="h-6 w-6" />
+              </button>
             </div>
 
             <form onSubmit={handleAddDish} className="space-y-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Dish Name</label>
-                  <input 
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Dish Name
+                  </label>
+                  <input
                     required
                     className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all"
                     placeholder="e.g. Royal Shahi Paneer"
                     value={newDish.name}
-                    onChange={e => setNewDish({...newDish, name: e.target.value})}
+                    onChange={(e) => setNewDish({ ...newDish, name: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Category</label>
-                  <select 
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Category
+                  </label>
+                  <select
                     className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all appearance-none"
                     value={newDish.cat}
-                    onChange={e => setNewDish({...newDish, cat: e.target.value})}
+                    onChange={(e) => setNewDish({ ...newDish, cat: e.target.value })}
                   >
-                    {categories.filter(c => c !== "All").map(c => (
-                      <option key={c} value={c} className="bg-background">{c}</option>
-                    ))}
+                    {categories
+                      .filter((c) => c !== "All")
+                      .map((c) => (
+                        <option key={c} value={c} className="bg-background">
+                          {c}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Price (₹)</label>
-                  <input 
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Price (₹)
+                  </label>
+                  <input
                     required
                     className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all"
                     placeholder="e.g. ₹ 450"
                     value={newDish.price}
-                    onChange={e => setNewDish({...newDish, price: e.target.value})}
+                    onChange={(e) => setNewDish({ ...newDish, price: e.target.value })}
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Description</label>
-                  <textarea 
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Description
+                  </label>
+                  <textarea
                     required
                     rows={3}
                     className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all resize-none"
                     placeholder="Tell the story of this dish..."
                     value={newDish.desc}
-                    onChange={e => setNewDish({...newDish, desc: e.target.value})}
+                    onChange={(e) => setNewDish({ ...newDish, desc: e.target.value })}
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Dish Photo <span className="text-muted-foreground/50">(optional, max 2MB)</span></label>
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Dish Photo <span className="text-muted-foreground/50">(optional, max 2MB)</span>
+                  </label>
                   {newDish.img ? (
                     <div className="relative group">
-                      <img src={newDish.img} alt="Preview" className="w-full h-40 object-cover rounded-2xl border border-white/10" />
+                      <img
+                        src={newDish.img}
+                        alt="Preview"
+                        className="w-full h-40 object-cover rounded-2xl border border-white/10"
+                      />
                       <button
                         type="button"
-                        onClick={() => setNewDish({...newDish, img: ""})}
+                        onClick={() => setNewDish({ ...newDish, img: "" })}
                         className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-red-500/80 transition-all opacity-0 group-hover:opacity-100"
                       >
                         <XCircle className="h-4 w-4" />
@@ -257,7 +297,9 @@ function AdminDashboard() {
                     <label className="flex flex-col items-center justify-center w-full h-32 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all">
                       <ImagePlus className="h-8 w-8 text-muted-foreground/40 mb-2" />
                       <span className="text-xs text-muted-foreground">Click to upload image</span>
-                      <span className="text-[10px] text-muted-foreground/50 mt-1">JPG, PNG, WebP</span>
+                      <span className="text-[10px] text-muted-foreground/50 mt-1">
+                        JPG, PNG, WebP
+                      </span>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -269,13 +311,15 @@ function AdminDashboard() {
                 </div>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 disabled={isSaving}
                 className="w-full group mt-4 flex items-center justify-center gap-3 rounded-full bg-primary py-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-all hover:gold-glow disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isSaving ? (
-                  <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                  </>
                 ) : (
                   <>Launch to Menu ✦</>
                 )}
@@ -289,7 +333,9 @@ function AdminDashboard() {
       <aside className="w-64 border-r border-border bg-card/30 backdrop-blur-xl flex flex-col">
         <div className="p-8">
           <h2 className="font-display text-2xl text-gradient-gold">Al Naaz</h2>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Management</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
+            Management
+          </p>
         </div>
 
         <nav className="flex-1 px-4 space-y-2">
@@ -297,7 +343,9 @@ function AdminDashboard() {
             onClick={() => setActiveTab("menu")}
             className={cn(
               "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all",
-              activeTab === "menu" ? "bg-primary text-primary-foreground gold-glow" : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+              activeTab === "menu"
+                ? "bg-primary text-primary-foreground gold-glow"
+                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
             )}
           >
             <Utensils className="h-4 w-4" />
@@ -307,7 +355,9 @@ function AdminDashboard() {
             onClick={() => setActiveTab("reservations")}
             className={cn(
               "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all",
-              activeTab === "reservations" ? "bg-primary text-primary-foreground gold-glow" : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+              activeTab === "reservations"
+                ? "bg-primary text-primary-foreground gold-glow"
+                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
             )}
           >
             <CalendarCheck className="h-4 w-4" />
@@ -334,10 +384,12 @@ function AdminDashboard() {
               {activeTab === "menu" ? "Signature Menu Management" : "Live Reservations"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {activeTab === "menu" ? "Curate the royal dining experience" : "Manage guest bookings and seating"}
+              {activeTab === "menu"
+                ? "Curate the royal dining experience"
+                : "Manage guest bookings and seating"}
             </p>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <button
               onClick={refreshData}
@@ -361,7 +413,12 @@ function AdminDashboard() {
           <div className="mb-6 flex items-center gap-3 rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400">
             <XCircle className="h-5 w-5 shrink-0" />
             <span>{saveError}</span>
-            <button onClick={() => setSaveError(null)} className="ml-auto p-1 hover:bg-white/5 rounded-full"><XCircle className="h-4 w-4" /></button>
+            <button
+              onClick={() => setSaveError(null)}
+              className="ml-auto p-1 hover:bg-white/5 rounded-full"
+            >
+              <XCircle className="h-4 w-4" />
+            </button>
           </div>
         )}
 
@@ -380,45 +437,70 @@ function AdminDashboard() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
               <StatCard icon={Utensils} label="Total Dishes" value={dishes.length} />
-              <StatCard icon={TrendingUp} label="Categories" value={new Set(dishes.map(d => d.cat)).size} />
+              <StatCard
+                icon={TrendingUp}
+                label="Categories"
+                value={new Set(dishes.map((d) => d.cat)).size}
+              />
               <StatCard icon={Users} label="Reservations" value={reservations.length} />
             </div>
 
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-display">Dish Registry</h3>
-              <button 
+              <button
                 onClick={openAddModal}
                 disabled={isPending}
                 className="flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-primary hover:bg-primary/20 transition-all disabled:opacity-50"
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
                 Add New Dish
               </button>
             </div>
 
             <div className="grid gap-4">
-              {dishes.length > 0 ? dishes.map((dish) => (
-                <div key={dish.id} className="glass-strong rounded-2xl p-4 flex items-center gap-6 group transition-all hover:border-primary/30">
-                  {dish.img ? (
-                    <img src={dish.img} className="h-16 w-16 rounded-xl object-cover" alt={dish.name} />
-                  ) : (
-                    <div className="h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Utensils className="h-6 w-6 text-primary/40" />
+              {dishes.length > 0 ? (
+                dishes.map((dish) => (
+                  <div
+                    key={dish.id}
+                    className="glass-strong rounded-2xl p-4 flex items-center gap-6 group transition-all hover:border-primary/30"
+                  >
+                    {dish.img ? (
+                      <img
+                        src={dish.img}
+                        className="h-16 w-16 rounded-xl object-cover"
+                        alt={dish.name}
+                      />
+                    ) : (
+                      <div className="h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <Utensils className="h-6 w-6 text-primary/40" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">{dish.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{dish.desc}</p>
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">{dish.name}</h4>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{dish.desc}</p>
+                    <div className="text-right px-6 border-x border-border/50">
+                      <p className="text-gradient-gold font-display text-lg">{dish.price}</p>
+                      <p className="text-[10px] uppercase tracking-tighter text-muted-foreground">
+                        {dish.cat}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => deleteDish(dish.id)}
+                        className="p-2 hover:bg-red-500/10 rounded-full text-muted-foreground hover:text-red-500"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="text-right px-6 border-x border-border/50">
-                    <p className="text-gradient-gold font-display text-lg">{dish.price}</p>
-                    <p className="text-[10px] uppercase tracking-tighter text-muted-foreground">{dish.cat}</p>
-                  </div>
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => deleteDish(dish.id)} className="p-2 hover:bg-red-500/10 rounded-full text-muted-foreground hover:text-red-500" title="Delete"><Trash2 className="h-4 w-4" /></button>
-                  </div>
-                </div>
-              )) : (
+                ))
+              ) : (
                 <div className="py-12 text-center text-muted-foreground italic">
                   No dishes yet. Click "Add New Dish" to begin.
                 </div>
@@ -453,7 +535,9 @@ function AdminDashboard() {
                           </div>
                         </td>
                         <td className="px-6 py-5">
-                          <span className="glass px-3 py-1 rounded-full text-xs">{res.guests} Guests</span>
+                          <span className="glass px-3 py-1 rounded-full text-xs">
+                            {res.guests} Guests
+                          </span>
                         </td>
                         <td className="px-6 py-5">
                           <StatusBadge status={res.status} />
@@ -462,14 +546,14 @@ function AdminDashboard() {
                           <div className="flex items-center justify-end gap-2">
                             {res.status === "pending" && (
                               <>
-                                <button 
+                                <button
                                   onClick={() => handleStatusChange(res.id, "confirmed")}
                                   className="p-2 rounded-full hover:bg-green-500/10 text-green-500 transition-all"
                                   title="Confirm"
                                 >
                                   <CheckCircle2 className="h-5 w-5" />
                                 </button>
-                                <button 
+                                <button
                                   onClick={() => handleStatusChange(res.id, "cancelled")}
                                   className="p-2 rounded-full hover:bg-red-500/10 text-red-500 transition-all"
                                   title="Cancel"
@@ -478,7 +562,7 @@ function AdminDashboard() {
                                 </button>
                               </>
                             )}
-                            <button 
+                            <button
                               onClick={() => handleDeleteReservation(res.id)}
                               className="p-2 rounded-full hover:bg-red-500/10 text-red-400/50 hover:text-red-500 transition-all"
                               title="Delete reservation"
@@ -491,7 +575,10 @@ function AdminDashboard() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-6 py-20 text-center text-muted-foreground italic">
+                      <td
+                        colSpan={5}
+                        className="px-6 py-20 text-center text-muted-foreground italic"
+                      >
                         No reservations recorded yet.
                       </td>
                     </tr>
@@ -506,7 +593,15 @@ function AdminDashboard() {
   );
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: any, label: string, value: string | number }) {
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string | number;
+}) {
   return (
     <div className="glass-strong rounded-3xl p-6 relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-5">
@@ -522,11 +617,16 @@ function StatusBadge({ status }: { status: Reservation["status"] }) {
   const styles = {
     pending: "bg-amber-500/10 text-amber-500 border-amber-500/20",
     confirmed: "bg-green-500/10 text-green-500 border-green-500/20",
-    cancelled: "bg-red-500/10 text-red-400 border-red-500/20"
+    cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
   };
-  
+
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider border", styles[status])}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider border",
+        styles[status],
+      )}
+    >
       {status}
     </span>
   );

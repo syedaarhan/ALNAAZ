@@ -23,61 +23,62 @@ function Index() {
   const schemaMarkup = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
-    "name": "Al Naaz",
-    "description": "Luxury Indian fine dining restaurant blending royal heritage cuisine with cinematic modern elegance",
-    "url": "https://alnaaz.com",
-    "telephone": "+91 98765 43210",
-    "address": {
+    name: "Al Naaz",
+    description:
+      "Luxury Indian fine dining restaurant blending royal heritage cuisine with cinematic modern elegance",
+    url: "https://alnaaz.com",
+    telephone: "+91 98765 43210",
+    address: {
       "@type": "PostalAddress",
-      "streetAddress": "Robertsonpet Road, Oorgaumpet",
-      "addressLocality": "KGF",
-      "postalCode": "563121",
-      "addressCountry": "IN"
+      streetAddress: "Robertsonpet Road, Oorgaumpet",
+      addressLocality: "KGF",
+      postalCode: "563121",
+      addressCountry: "IN",
     },
-    "geo": {
+    geo: {
       "@type": "GeoCoordinates",
-      "latitude": "17.4129",
-      "longitude": "78.4257"
+      latitude: "17.4129",
+      longitude: "78.4257",
     },
-    "image": "https://alnaaz.com/hero.jpg",
-    "priceRange": "₹₹₹",
-    "servesCuisine": "Indian",
-    "aggregateRating": {
+    image: "https://alnaaz.com/hero.jpg",
+    priceRange: "₹₹₹",
+    servesCuisine: "Indian",
+    aggregateRating: {
       "@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "ratingCount": "230"
+      ratingValue: "4.9",
+      ratingCount: "230",
     },
-    "openingHoursSpecification": [
+    openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        "opens": "12:00",
-        "closes": "23:30"
-      }
-    ]
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        opens: "12:00",
+        closes: "23:30",
+      },
+    ],
   };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
-        {/* Schema Markup */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
-        />
+      {/* Schema Markup */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+      />
 
-        <Navbar />
-        <main>
-          <Hero />
-          <About />
-          <Menu />
-          <SpecialDish />
-          <Gallery />
-          <Events />
-          <Reviews />
-          <Reservation />
-          <Contact />
-        </main>
-        <Footer />
-      </div>
-    );
+      <Navbar />
+      <main>
+        <Hero />
+        <About />
+        <Menu />
+        <SpecialDish />
+        <Gallery />
+        <Events />
+        <Reviews />
+        <Reservation />
+        <Contact />
+      </main>
+      <Footer />
+    </div>
+  );
 }

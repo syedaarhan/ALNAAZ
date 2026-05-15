@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from "./supabase";
 import dishStarter from "@/assets/dish-starter.jpg";
 import dishBiryani from "@/assets/dish-biryani.jpg";
 import dishBbq from "@/assets/dish-bbq.jpg";
@@ -21,16 +21,141 @@ export type Dish = {
 };
 
 export const defaultDishes: Dish[] = [
-  { id: "paneer-tikka", cat: "Starters", name: "Paneer Shahi Tikka", desc: "Smoky paneer marinated in royal spices, kissed by tandoor flame.", price: "₹ 480", priceNum: 480, rating: 4.9, img: dishStarter, chef: true, ingredients: ["Organic Paneer", "Kashmiri Chili", "Garam Masala", "Hung Curd"], spiceLevel: 2, prepTime: "20 min" },
-  { id: "galouti-kebab", cat: "Starters", name: "Galouti Kebab", desc: "104 spices, melt-in-mouth lamb mince, a Lucknowi treasure.", price: "₹ 620", priceNum: 620, rating: 4.8, img: dishBbq, ingredients: ["Minced Lamb", "Papaya Paste", "Signature Spice Blend", "Saffron"], spiceLevel: 1, prepTime: "25 min" },
-  { id: "hyderabadi-biryani", cat: "Biryani", name: "Hyderabadi Dum Biryani", desc: "Saffron-laced basmati slow-cooked in copper handi.", price: "₹ 720", priceNum: 720, rating: 5.0, img: dishBiryani, chef: true, ingredients: ["Long-grain Basmati", "Spring Lamb", "Persian Saffron", "Native Ghee"], spiceLevel: 3, prepTime: "45 min" },
-  { id: "lucknowi-biryani", cat: "Biryani", name: "Lucknowi Awadhi Biryani", desc: "Subtle, fragrant, layered — a poem on the palate.", price: "₹ 690", priceNum: 690, rating: 4.9, img: dishBiryani, ingredients: ["Aromatic Rice", "Yogurt", "Star Anise", "Mace"], spiceLevel: 1, prepTime: "40 min" },
-  { id: "seekh-khaas", cat: "BBQ", name: "Seekh-e-Khaas", desc: "Hand-minced kebabs grilled over coal, finished with butter.", price: "₹ 560", priceNum: 560, rating: 4.8, img: dishBbq, chef: true, ingredients: ["Hand-minced Lamb", "Green Chilies", "Cilantro", "White Butter"], spiceLevel: 2, prepTime: "30 min" },
-  { id: "tandoori-raan", cat: "BBQ", name: "Tandoori Raan", desc: "Whole leg of lamb, slow roasted with whole spices.", price: "₹ 1480", priceNum: 1480, rating: 4.9, img: dishBbq, ingredients: ["Whole Lamb Leg", "Malt Vinegar", "Black Cumin", "Garlic"], spiceLevel: 2, prepTime: "60 min" },
-  { id: "gulab-jamun", cat: "Desserts", name: "Shahi Gulab Jamun", desc: "Pillowy khoya dumplings in cardamom-rose syrup.", price: "₹ 320", priceNum: 320, rating: 4.9, img: dishDessert, chef: true, ingredients: ["Fresh Khoya", "Green Cardamom", "Rose Petals", "Pistachio"], spiceLevel: 0, prepTime: "15 min" },
-  { id: "phirni-royale", cat: "Desserts", name: "Phirni Royale", desc: "Slow-set saffron rice pudding with edible silver.", price: "₹ 290", priceNum: 290, rating: 4.7, img: dishDessert, ingredients: ["Basmati Rice", "Full Cream Milk", "Saffron", "Silver Vark"], spiceLevel: 0, prepTime: "20 min" },
-  { id: "mango-lassi", cat: "Drinks", name: "Royal Mango Lassi", desc: "Alphonso mango churned with hung yogurt, saffron dust.", price: "₹ 240", priceNum: 240, rating: 4.9, img: dishDrink, chef: true, ingredients: ["Alphonso Mango", "Creamy Yogurt", "Honey", "Saffron Threads"], spiceLevel: 0, prepTime: "10 min" },
-  { id: "kahwa", cat: "Drinks", name: "Kashmiri Kahwa", desc: "Green tea, almonds, cinnamon — the warmth of the valley.", price: "₹ 180", priceNum: 180, rating: 4.8, img: dishDrink, ingredients: ["Green Tea Leaves", "Kashmiri Saffron", "Almond Slivers", "Cinnamon"], spiceLevel: 0, prepTime: "10 min" },
+  {
+    id: "paneer-tikka",
+    cat: "Starters",
+    name: "Paneer Shahi Tikka",
+    desc: "Smoky paneer marinated in royal spices, kissed by tandoor flame.",
+    price: "₹ 480",
+    priceNum: 480,
+    rating: 4.9,
+    img: dishStarter,
+    chef: true,
+    ingredients: ["Organic Paneer", "Kashmiri Chili", "Garam Masala", "Hung Curd"],
+    spiceLevel: 2,
+    prepTime: "20 min",
+  },
+  {
+    id: "galouti-kebab",
+    cat: "Starters",
+    name: "Galouti Kebab",
+    desc: "104 spices, melt-in-mouth lamb mince, a Lucknowi treasure.",
+    price: "₹ 620",
+    priceNum: 620,
+    rating: 4.8,
+    img: dishBbq,
+    ingredients: ["Minced Lamb", "Papaya Paste", "Signature Spice Blend", "Saffron"],
+    spiceLevel: 1,
+    prepTime: "25 min",
+  },
+  {
+    id: "hyderabadi-biryani",
+    cat: "Biryani",
+    name: "Hyderabadi Dum Biryani",
+    desc: "Saffron-laced basmati slow-cooked in copper handi.",
+    price: "₹ 720",
+    priceNum: 720,
+    rating: 5.0,
+    img: dishBiryani,
+    chef: true,
+    ingredients: ["Long-grain Basmati", "Spring Lamb", "Persian Saffron", "Native Ghee"],
+    spiceLevel: 3,
+    prepTime: "45 min",
+  },
+  {
+    id: "lucknowi-biryani",
+    cat: "Biryani",
+    name: "Lucknowi Awadhi Biryani",
+    desc: "Subtle, fragrant, layered — a poem on the palate.",
+    price: "₹ 690",
+    priceNum: 690,
+    rating: 4.9,
+    img: dishBiryani,
+    ingredients: ["Aromatic Rice", "Yogurt", "Star Anise", "Mace"],
+    spiceLevel: 1,
+    prepTime: "40 min",
+  },
+  {
+    id: "seekh-khaas",
+    cat: "BBQ",
+    name: "Seekh-e-Khaas",
+    desc: "Hand-minced kebabs grilled over coal, finished with butter.",
+    price: "₹ 560",
+    priceNum: 560,
+    rating: 4.8,
+    img: dishBbq,
+    chef: true,
+    ingredients: ["Hand-minced Lamb", "Green Chilies", "Cilantro", "White Butter"],
+    spiceLevel: 2,
+    prepTime: "30 min",
+  },
+  {
+    id: "tandoori-raan",
+    cat: "BBQ",
+    name: "Tandoori Raan",
+    desc: "Whole leg of lamb, slow roasted with whole spices.",
+    price: "₹ 1480",
+    priceNum: 1480,
+    rating: 4.9,
+    img: dishBbq,
+    ingredients: ["Whole Lamb Leg", "Malt Vinegar", "Black Cumin", "Garlic"],
+    spiceLevel: 2,
+    prepTime: "60 min",
+  },
+  {
+    id: "gulab-jamun",
+    cat: "Desserts",
+    name: "Shahi Gulab Jamun",
+    desc: "Pillowy khoya dumplings in cardamom-rose syrup.",
+    price: "₹ 320",
+    priceNum: 320,
+    rating: 4.9,
+    img: dishDessert,
+    chef: true,
+    ingredients: ["Fresh Khoya", "Green Cardamom", "Rose Petals", "Pistachio"],
+    spiceLevel: 0,
+    prepTime: "15 min",
+  },
+  {
+    id: "phirni-royale",
+    cat: "Desserts",
+    name: "Phirni Royale",
+    desc: "Slow-set saffron rice pudding with edible silver.",
+    price: "₹ 290",
+    priceNum: 290,
+    rating: 4.7,
+    img: dishDessert,
+    ingredients: ["Basmati Rice", "Full Cream Milk", "Saffron", "Silver Vark"],
+    spiceLevel: 0,
+    prepTime: "20 min",
+  },
+  {
+    id: "mango-lassi",
+    cat: "Drinks",
+    name: "Royal Mango Lassi",
+    desc: "Alphonso mango churned with hung yogurt, saffron dust.",
+    price: "₹ 240",
+    priceNum: 240,
+    rating: 4.9,
+    img: dishDrink,
+    chef: true,
+    ingredients: ["Alphonso Mango", "Creamy Yogurt", "Honey", "Saffron Threads"],
+    spiceLevel: 0,
+    prepTime: "10 min",
+  },
+  {
+    id: "kahwa",
+    cat: "Drinks",
+    name: "Kashmiri Kahwa",
+    desc: "Green tea, almonds, cinnamon — the warmth of the valley.",
+    price: "₹ 180",
+    priceNum: 180,
+    rating: 4.8,
+    img: dishDrink,
+    ingredients: ["Green Tea Leaves", "Kashmiri Saffron", "Almond Slivers", "Cinnamon"],
+    spiceLevel: 0,
+    prepTime: "10 min",
+  },
 ];
 
 export const categories = ["All", "Starters", "Biryani", "BBQ", "Desserts", "Drinks"];
@@ -82,7 +207,7 @@ let _dbReady: boolean | null = null;
 async function checkDb(): Promise<boolean> {
   if (_dbReady !== null) return _dbReady;
   try {
-    const { error } = await supabase.from('menu').select('id').limit(1);
+    const { error } = await supabase.from("menu").select("id").limit(1);
     _dbReady = !error;
     if (error) console.warn("Supabase tables not ready:", error.message);
   } catch {
@@ -152,13 +277,15 @@ export const getMenu = async (): Promise<Dish[]> => {
   const dbOk = await checkDb();
   if (dbOk) {
     try {
-      const { data, error } = await supabase.from('menu').select('*').order('name');
+      const { data, error } = await supabase.from("menu").select("*").order("name");
       if (!error && data && data.length > 0) {
         _menuCache = data;
         setLocal(LS_MENU, data);
         return data;
       }
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
   }
 
   // 3. localStorage
@@ -187,9 +314,11 @@ export const saveMenu = async (dishes: Dish[]): Promise<{ ok: boolean; error?: s
   const dbOk = await checkDb();
   if (dbOk) {
     try {
-      const { error } = await supabase.from('menu').upsert(dishes);
+      const { error } = await supabase.from("menu").upsert(dishes);
       if (error) console.warn("Cloud menu save failed:", error.message);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   return { ok: true };
@@ -197,15 +326,17 @@ export const saveMenu = async (dishes: Dish[]): Promise<{ ok: boolean; error?: s
 
 export const deleteDishFromDb = async (id: string): Promise<{ ok: boolean; error?: string }> => {
   // Update cache
-  _menuCache = (_menuCache || []).filter(d => d.id !== id);
+  _menuCache = (_menuCache || []).filter((d) => d.id !== id);
   window.dispatchEvent(new Event(MENU_UPDATED_EVENT));
   setLocal(LS_MENU, _menuCache);
 
   const dbOk = await checkDb();
   if (dbOk) {
     try {
-      await supabase.from('menu').delete().eq('id', id);
-    } catch { /* ignore */ }
+      await supabase.from("menu").delete().eq("id", id);
+    } catch {
+      /* ignore */
+    }
   }
   return { ok: true };
 };
@@ -232,16 +363,21 @@ export const getReservations = async (): Promise<Reservation[]> => {
   const dbOk = await checkDb();
   if (dbOk) {
     try {
-      const { data, error } = await supabase.from('reservations').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (!error && data) {
         const local = getLocal<Reservation[]>(LS_RESERVATIONS, []);
-        const cloudIds = new Set(data.map(r => r.id));
-        const merged = [...data, ...local.filter(r => !cloudIds.has(r.id))];
+        const cloudIds = new Set(data.map((r) => r.id));
+        const merged = [...data, ...local.filter((r) => !cloudIds.has(r.id))];
         _reservationsCache = merged;
         setLocal(LS_RESERVATIONS, merged);
         return merged;
       }
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
   }
 
   const local = getLocal<Reservation[]>(LS_RESERVATIONS, []);
@@ -249,7 +385,9 @@ export const getReservations = async (): Promise<Reservation[]> => {
   return local;
 };
 
-export const saveReservation = async (res: Omit<Reservation, "id" | "status" | "created_at">): Promise<{ ok: boolean; error?: string }> => {
+export const saveReservation = async (
+  res: Omit<Reservation, "id" | "status" | "created_at">,
+): Promise<{ ok: boolean; error?: string }> => {
   const newRes: Reservation = {
     ...res,
     id: crypto.randomUUID(),
@@ -266,38 +404,53 @@ export const saveReservation = async (res: Omit<Reservation, "id" | "status" | "
   const dbOk = await checkDb();
   if (dbOk) {
     try {
-      await supabase.from('reservations').insert([{
-        name: newRes.name, phone: newRes.phone, date: newRes.date,
-        time: newRes.time, guests: newRes.guests, requests: newRes.requests,
-        status: newRes.status,
-      }]);
-    } catch { /* ignore */ }
+      await supabase.from("reservations").insert([
+        {
+          name: newRes.name,
+          phone: newRes.phone,
+          date: newRes.date,
+          time: newRes.time,
+          guests: newRes.guests,
+          requests: newRes.requests,
+          status: newRes.status,
+        },
+      ]);
+    } catch {
+      /* ignore */
+    }
   }
   return { ok: true };
 };
 
-export const updateReservationStatus = async (id: string, status: Reservation["status"]): Promise<{ ok: boolean; error?: string }> => {
-  _reservationsCache = (_reservationsCache || []).map(r => r.id === id ? { ...r, status } : r);
+export const updateReservationStatus = async (
+  id: string,
+  status: Reservation["status"],
+): Promise<{ ok: boolean; error?: string }> => {
+  _reservationsCache = (_reservationsCache || []).map((r) => (r.id === id ? { ...r, status } : r));
   setLocal(LS_RESERVATIONS, _reservationsCache);
 
   const dbOk = await checkDb();
   if (dbOk) {
     try {
-      await supabase.from('reservations').update({ status }).eq('id', id);
-    } catch { /* ignore */ }
+      await supabase.from("reservations").update({ status }).eq("id", id);
+    } catch {
+      /* ignore */
+    }
   }
   return { ok: true };
 };
 
 export const deleteReservation = async (id: string): Promise<{ ok: boolean; error?: string }> => {
-  _reservationsCache = (_reservationsCache || []).filter(r => r.id !== id);
+  _reservationsCache = (_reservationsCache || []).filter((r) => r.id !== id);
   setLocal(LS_RESERVATIONS, _reservationsCache);
 
   const dbOk = await checkDb();
   if (dbOk) {
     try {
-      await supabase.from('reservations').delete().eq('id', id);
-    } catch { /* ignore */ }
+      await supabase.from("reservations").delete().eq("id", id);
+    } catch {
+      /* ignore */
+    }
   }
   return { ok: true };
 };

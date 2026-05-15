@@ -37,12 +37,12 @@ export function Hero() {
   }, []);
 
   return (
-    <section 
-      id="home" 
+    <section
+      id="home"
       ref={sectionRef}
       className="relative isolate flex min-h-screen items-center overflow-hidden"
     >
-      <div 
+      <div
         className="absolute inset-0 z-0 will-change-transform"
         style={{ transform: `translate3d(0, ${scrollY * 0.4}px, 0)` }}
       >
@@ -55,17 +55,17 @@ export function Hero() {
           style={{ transform: `scale(${1 + scrollY * 0.0005})` }}
         />
       </div>
-      
+
       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-background/70 via-background/40 to-background" />
       <div className="absolute inset-0 z-[1] bg-gradient-to-r from-background/80 via-background/30 to-transparent" />
 
       {/* floating glow orbs with mouse reactivity */}
-      <div 
-        className="pointer-events-none absolute -left-20 top-1/3 z-[2] h-72 w-72 rounded-full bg-primary/30 blur-[120px] animate-[glow_4s_ease-in-out_infinite]" 
+      <div
+        className="pointer-events-none absolute -left-20 top-1/3 z-[2] h-72 w-72 rounded-full bg-primary/30 blur-[120px] animate-[glow_4s_ease-in-out_infinite]"
         style={{ transform: `translate(${mousePos.x}px, ${mousePos.y}px)` }}
       />
-      <div 
-        className="pointer-events-none absolute -right-20 bottom-20 z-[2] h-96 w-96 rounded-full bg-primary/20 blur-[140px] animate-[glow_5s_ease-in-out_infinite]" 
+      <div
+        className="pointer-events-none absolute -right-20 bottom-20 z-[2] h-96 w-96 rounded-full bg-primary/20 blur-[140px] animate-[glow_5s_ease-in-out_infinite]"
         style={{ transform: `translate(${-mousePos.x * 1.5}px, ${-mousePos.y * 1.5}px)` }}
       />
 
@@ -78,7 +78,7 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-32 pb-24">
-        <div 
+        <div
           className="max-w-3xl animate-[fade-up_1.2s_cubic-bezier(0.22,1,0.36,1)_both]"
           style={{ transform: `translateY(${-scrollY * 0.1}px)` }}
         >
@@ -87,8 +87,7 @@ export function Hero() {
             Fine Indian Dining · Est. 1987
           </div>
           <h1 className="font-display text-5xl leading-[1.05] sm:text-6xl md:text-7xl lg:text-[88px]">
-            Experience{" "}
-            <span className="text-gradient-gold italic">Royal</span>
+            Experience <span className="text-gradient-gold italic">Royal</span>
             <br />
             Dining
           </h1>
@@ -147,14 +146,14 @@ function Stat({ n, label }: { n: string; label: string }) {
 
 function Particle({ x, y, delay, size }: { x: number; y: number; delay: number; size: number }) {
   return (
-    <div 
+    <div
       className="absolute animate-[float_8s_ease-in-out_infinite] rounded-full bg-primary/20 blur-[1px]"
-      style={{ 
-        left: `${x}%`, 
-        top: `${y}%`, 
-        width: `${size * 4}px`, 
+      style={{
+        left: `${x}%`,
+        top: `${y}%`,
+        width: `${size * 4}px`,
         height: `${size * 4}px`,
-        animationDelay: `${delay}s` 
+        animationDelay: `${delay}s`,
       }}
     />
   );
