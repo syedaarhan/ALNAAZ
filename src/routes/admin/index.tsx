@@ -46,9 +46,22 @@ function AdminDashboard() {
   };
   const [newDish, setNewDish] = useState<Partial<Dish>>(emptyDish);
 
-  const fetchData = async () => {
+  // Initial load — uses cache, doesn't lose data
+  const loadData = async () => {
     setIsLoading(true);
-    clearCache(); // Clear stale in-memory cache so we get fresh data
+    const [menuData, resData] = await Promise.all([
+      getMenu(),
+      getReservations()
+    ]);
+    setDishes(menuData);
+    setReservations(resData);
+    setIsLoading(false);
+  };
+
+  // Manual refresh — clears cache, re-fetches everything fresh
+  const refreshData = async () => {
+    setIsLoading(true);
+    clearCache();
     const [menuData, resData] = await Promise.all([
       getMenu(),
       getReservations()
@@ -64,7 +77,7 @@ function AdminDashboard() {
       navigate({ to: "/admin/login" });
       return;
     }
-    fetchData();
+    loadData();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -315,7 +328,7 @@ function AdminDashboard() {
           
           <div className="flex items-center gap-4">
             <button
-              onClick={fetchData}
+              onClick={refreshData}
               disabled={isLoading}
               className="glass px-4 py-2 rounded-full flex items-center gap-2 text-xs hover:bg-white/5 transition-all disabled:opacity-50"
               title="Refresh data"
