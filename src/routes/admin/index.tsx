@@ -15,6 +15,10 @@ import {
   Loader2,
   ImagePlus,
   Upload,
+  Pencil,
+  ChefHat,
+  Flame,
+  MessageSquare,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -42,11 +46,13 @@ function AdminDashboard() {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [expandedRes, setExpandedRes] = useState<string | null>(null);
 
   const emptyDish: Partial<Dish> = {
     name: "",
@@ -56,8 +62,16 @@ function AdminDashboard() {
     img: "",
     priceNum: 0,
     rating: 5.0,
+    chef: false,
+    spiceLevel: 0,
+    prepTime: "",
+    ingredients: [],
   };
   const [newDish, setNewDish] = useState<Partial<Dish>>(emptyDish);
+
+  const isModalOpen = isAdding || !!editingDish;
+  const modalDish = newDish;
+  const closeModal = () => { setIsAdding(false); setEditingDish(null); setNewDish(emptyDish); };
 
   // Initial load — uses cache, doesn't lose data
   const loadData = async () => {
@@ -118,43 +132,49 @@ function AdminDashboard() {
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const raw = ev.target?.result as string;
-      // Compress to ~50-100KB so it fits in localStorage
       const compressed = await compressImage(raw);
-      setNewDish({ ...newDish, img: compressed });
+      setNewDish((prev) => ({ ...prev, img: compressed }));
     };
     reader.readAsDataURL(file);
   };
 
-  const handleAddDish = async (e: React.FormEvent) => {
+  const openEditModal = (dish: Dish) => {
+    setNewDish({ ...dish });
+    setEditingDish(dish);
+  };
+
+  const handleSaveDish = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     setSaveError(null);
 
     const dish: Dish = {
       ...(newDish as Dish),
-      id:
-        newDish.name
-          ?.toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/[^a-z0-9-]/g, "") || Math.random().toString(36).substr(2, 9),
+      id: editingDish ? editingDish.id :
+        newDish.name?.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || Math.random().toString(36).substr(2, 9),
       priceNum: parseInt(newDish.price?.replace(/[^0-9]/g, "") || "0"),
       rating: newDish.rating || 5.0,
       img: newDish.img || "",
+      chef: newDish.chef || false,
+      spiceLevel: (newDish.spiceLevel || 0) as 0|1|2|3,
+      prepTime: newDish.prepTime || "",
+      ingredients: newDish.ingredients || [],
     };
 
-    const updated = [...dishes, dish];
+    const updated = editingDish
+      ? dishes.map((d) => (d.id === editingDish.id ? dish : d))
+      : [...dishes, dish];
     setDishes(updated);
 
     const result = await saveMenu(updated);
     setIsSaving(false);
 
     if (!result.ok) {
-      setSaveError(result.error || "Failed to save. Changes are local only.");
+      setSaveError(result.error || "Failed to save.");
     }
 
-    setIsAdding(false);
-    setNewDish(emptyDish);
-    showSaveSuccess(`"${dish.name}" added to menu`);
+    closeModal();
+    showSaveSuccess(editingDish ? `"${dish.name}" updated` : `"${dish.name}" added to menu`);
   };
 
   const handleStatusChange = async (id: string, status: Reservation["status"]) => {
@@ -184,36 +204,31 @@ function AdminDashboard() {
     }
   };
 
-  // Use startTransition to avoid blocking the UI when opening the modal
   const openAddModal = () => {
-    startTransition(() => {
-      setIsAdding(true);
-    });
+    setNewDish(emptyDish);
+    startTransition(() => { setIsAdding(true); });
   };
 
   return (
     <div className="flex min-h-screen bg-background">
       {/* Add Dish Modal */}
-      {isAdding && (
+      {isModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-6"
-          onClick={() => setIsAdding(false)}
+          onClick={closeModal}
         >
           <div
             className="glass-strong w-full max-w-lg rounded-3xl p-8 luxury-shadow"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-display">New Culinary Creation</h2>
-              <button
-                onClick={() => setIsAdding(false)}
-                className="p-2 hover:bg-white/5 rounded-full text-muted-foreground"
-              >
+              <h2 className="text-2xl font-display">{editingDish ? "Edit Dish" : "New Culinary Creation"}</h2>
+              <button onClick={closeModal} className="p-2 hover:bg-white/5 rounded-full text-muted-foreground">
                 <XCircle className="h-6 w-6" />
               </button>
             </div>
 
-            <form onSubmit={handleAddDish} className="space-y-5">
+            <form onSubmit={handleSaveDish} className="space-y-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -311,6 +326,39 @@ function AdminDashboard() {
                 </div>
               </div>
 
+              {/* Advanced Options */}
+              <details className="rounded-2xl bg-white/[0.03] border border-white/10 p-4">
+                <summary className="text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer">Advanced Options</summary>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={!!newDish.chef} onChange={(e) => setNewDish({...newDish, chef: e.target.checked})} className="rounded" />
+                    <ChefHat className="h-4 w-4 text-primary" />
+                    <span className="text-sm">Chef's Pick</span>
+                  </label>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Spice Level</label>
+                    <div className="flex gap-1">
+                      {[0,1,2,3].map((lvl) => (
+                        <button key={lvl} type="button" onClick={() => setNewDish({...newDish, spiceLevel: lvl as 0|1|2|3})}
+                          className={cn("p-2 rounded-lg transition-all", (newDish.spiceLevel || 0) >= lvl && lvl > 0 ? "bg-red-500/20 text-red-400" : "bg-white/5 text-muted-foreground")}>
+                          {lvl === 0 ? "None" : <Flame className="h-4 w-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Prep Time</label>
+                    <input className="w-full rounded-xl bg-white/5 border border-white/10 py-2 px-3 text-sm outline-none" placeholder="e.g. 25 min"
+                      value={newDish.prepTime || ""} onChange={(e) => setNewDish({...newDish, prepTime: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ingredients (comma-separated)</label>
+                    <input className="w-full rounded-xl bg-white/5 border border-white/10 py-2 px-3 text-sm outline-none" placeholder="e.g. Paneer, Spices, Cream"
+                      value={(newDish.ingredients || []).join(", ")} onChange={(e) => setNewDish({...newDish, ingredients: e.target.value.split(",").map(s => s.trim()).filter(Boolean)})} />
+                  </div>
+                </div>
+              </details>
+
               <button
                 type="submit"
                 disabled={isSaving}
@@ -321,7 +369,7 @@ function AdminDashboard() {
                     <Loader2 className="h-4 w-4 animate-spin" /> Saving...
                   </>
                 ) : (
-                  <>Launch to Menu ✦</>
+                  <>{editingDish ? "Save Changes ✦" : "Launch to Menu ✦"}</>
                 )}
               </button>
             </form>
@@ -491,6 +539,13 @@ function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
+                        onClick={() => openEditModal(dish)}
+                        className="p-2 hover:bg-primary/10 rounded-full text-muted-foreground hover:text-primary"
+                        title="Edit"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
                         onClick={() => deleteDish(dish.id)}
                         className="p-2 hover:bg-red-500/10 rounded-full text-muted-foreground hover:text-red-500"
                         title="Delete"
@@ -516,6 +571,7 @@ function AdminDashboard() {
                     <th className="px-6 py-4">Guest</th>
                     <th className="px-6 py-4">Date & Time</th>
                     <th className="px-6 py-4">Pax</th>
+                    <th className="px-6 py-4">Requests</th>
                     <th className="px-6 py-4">Status</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
@@ -538,6 +594,16 @@ function AdminDashboard() {
                           <span className="glass px-3 py-1 rounded-full text-xs">
                             {res.guests} Guests
                           </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          {res.requests ? (
+                            <button onClick={() => setExpandedRes(expandedRes === res.id ? null : res.id)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-all">
+                              <MessageSquare className="h-3 w-3 text-primary" />
+                              {expandedRes === res.id ? res.requests : (res.requests.length > 30 ? res.requests.slice(0, 30) + "..." : res.requests)}
+                            </button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground/40 italic">None</span>
+                          )}
                         </td>
                         <td className="px-6 py-5">
                           <StatusBadge status={res.status} />
@@ -575,10 +641,7 @@ function AdminDashboard() {
                     ))
                   ) : (
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="px-6 py-20 text-center text-muted-foreground italic"
-                      >
+                      <td colSpan={6} className="px-6 py-20 text-center text-muted-foreground italic">
                         No reservations recorded yet.
                       </td>
                     </tr>
