@@ -12,7 +12,9 @@ import {
   TrendingUp,
   Users,
   RefreshCw,
-  Loader2
+  Loader2,
+  ImagePlus,
+  Upload
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, Dish, Reservation, categories } from "@/lib/data";
@@ -85,6 +87,20 @@ function AdminDashboard() {
     showSaveSuccess("Dish removed from menu");
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setSaveError("Image must be under 2MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setNewDish({ ...newDish, img: ev.target?.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleAddDish = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -95,7 +111,7 @@ function AdminDashboard() {
       id: newDish.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || Math.random().toString(36).substr(2, 9),
       priceNum: parseInt(newDish.price?.replace(/[^0-9]/g, '') || "0"),
       rating: newDish.rating || 5.0,
-      img: newDish.img || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=400&auto=format&fit=crop"
+      img: newDish.img || ""
     };
     
     const updated = [...dishes, dish];
@@ -196,13 +212,31 @@ function AdminDashboard() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Image URL <span className="text-muted-foreground/50">(optional)</span></label>
-                  <input 
-                    className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all"
-                    placeholder="https://images.unsplash.com/..."
-                    value={newDish.img}
-                    onChange={e => setNewDish({...newDish, img: e.target.value})}
-                  />
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Dish Photo <span className="text-muted-foreground/50">(optional, max 2MB)</span></label>
+                  {newDish.img ? (
+                    <div className="relative group">
+                      <img src={newDish.img} alt="Preview" className="w-full h-40 object-cover rounded-2xl border border-white/10" />
+                      <button
+                        type="button"
+                        onClick={() => setNewDish({...newDish, img: ""})}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-red-500/80 transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full h-32 rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all">
+                      <ImagePlus className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                      <span className="text-xs text-muted-foreground">Click to upload image</span>
+                      <span className="text-[10px] text-muted-foreground/50 mt-1">JPG, PNG, WebP</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
               </div>
 
