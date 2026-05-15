@@ -35,24 +35,84 @@ export const defaultDishes: Dish[] = [
 
 export const categories = ["All", "Starters", "Biryani", "BBQ", "Desserts", "Drinks"];
 
-// Fetch Menu from Supabase
+// ---------- DATABASE HEALTH CHECK ----------
+
+/** Test if Supabase is reachable and tables exist */
+let _dbHealthy: boolean | null = null;
+
+async function isDbHealthy(): Promise<boolean> {
+  if (_dbHealthy !== null) return _dbHealthy;
+  try {
+    // A lightweight probe — just try to read 1 row from 'menu'
+    const { error } = await supabase.from('menu').select('id').limit(1);
+    _dbHealthy = !error;
+    if (error) console.warn("Supabase not available:", error.message);
+  } catch {
+    _dbHealthy = false;
+  }
+  return _dbHealthy;
+}
+
+/** Reset health cache (call after fixing config) */
+export function resetDbHealth() {
+  _dbHealthy = null;
+}
+
+// ---------- MENU CRUD ----------
+
 export const getMenu = async (): Promise<Dish[]> => {
+  if (!(await isDbHealthy())) return defaultDishes;
+
   try {
     const { data, error } = await supabase.from('menu').select('*').order('name');
-    if (error) throw error;
+    if (error) {
+      console.warn("getMenu error, using defaults:", error.message);
+      return defaultDishes;
+    }
     if (!data || data.length === 0) return defaultDishes;
     return data;
-  } catch (error) {
-    console.warn("Supabase fetch failed, using defaults:", error);
+  } catch (err) {
+    console.warn("getMenu exception, using defaults:", err);
     return defaultDishes;
   }
 };
 
-export const saveMenu = async (dishes: Dish[]) => {
-  // In a real scenario, we'd upsert each dish. For now, we'll try to sync.
-  const { error } = await supabase.from('menu').upsert(dishes);
-  if (error) console.error("Error saving menu:", error);
+export const saveMenu = async (dishes: Dish[]): Promise<{ ok: boolean; error?: string }> => {
+  if (!(await isDbHealthy())) {
+    return { ok: false, error: "Database is not connected. Your changes are saved locally until the session ends." };
+  }
+
+  try {
+    const { error } = await supabase.from('menu').upsert(dishes);
+    if (error) {
+      console.error("saveMenu error:", error.message, error.details, error.hint);
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (err: any) {
+    console.error("saveMenu exception:", err);
+    return { ok: false, error: err.message || "Unknown error" };
+  }
 };
+
+export const deleteDishFromDb = async (id: string): Promise<{ ok: boolean; error?: string }> => {
+  if (!(await isDbHealthy())) {
+    return { ok: false, error: "Database is not connected." };
+  }
+
+  try {
+    const { error } = await supabase.from('menu').delete().eq('id', id);
+    if (error) {
+      console.error("deleteDish error:", error.message);
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (err: any) {
+    return { ok: false, error: err.message || "Unknown error" };
+  }
+};
+
+// ---------- RESERVATION TYPES ----------
 
 export type Reservation = {
   id: string;
@@ -63,32 +123,63 @@ export type Reservation = {
   guests: string;
   requests: string;
   status: "pending" | "confirmed" | "cancelled";
-  created_at?: string; // Supabase uses snake_case by default
+  created_at?: string;
 };
 
-// Fetch Reservations from Supabase
+// ---------- RESERVATION CRUD ----------
+
 export const getReservations = async (): Promise<Reservation[]> => {
+  if (!(await isDbHealthy())) return [];
+
   try {
     const { data, error } = await supabase.from('reservations').select('*').order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) {
+      console.warn("getReservations error:", error.message);
+      return [];
+    }
     return data || [];
-  } catch (error) {
-    console.error("Error fetching reservations:", error);
+  } catch (err) {
+    console.warn("getReservations exception:", err);
     return [];
   }
 };
 
-export const saveReservation = async (res: Omit<Reservation, "id" | "status" | "created_at">) => {
+export const saveReservation = async (res: Omit<Reservation, "id" | "status" | "created_at">): Promise<{ ok: boolean; error?: string }> => {
+  if (!(await isDbHealthy())) {
+    return { ok: false, error: "Database is not connected. Please contact the restaurant directly to make a reservation." };
+  }
+
   const newRes = {
     ...res,
     status: "pending",
   };
-  const { data, error } = await supabase.from('reservations').insert([newRes]).select();
-  if (error) throw error;
-  return data?.[0];
+
+  try {
+    const { error } = await supabase.from('reservations').insert([newRes]);
+    if (error) {
+      console.error("saveReservation error:", error.message, error.details, error.hint);
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (err: any) {
+    console.error("saveReservation exception:", err);
+    return { ok: false, error: err.message || "Unknown error" };
+  }
 };
 
-export const updateReservationStatus = async (id: string, status: Reservation["status"]) => {
-  const { error } = await supabase.from('reservations').update({ status }).eq('id', id);
-  if (error) console.error("Error updating reservation:", error);
+export const updateReservationStatus = async (id: string, status: Reservation["status"]): Promise<{ ok: boolean; error?: string }> => {
+  if (!(await isDbHealthy())) {
+    return { ok: false, error: "Database is not connected." };
+  }
+
+  try {
+    const { error } = await supabase.from('reservations').update({ status }).eq('id', id);
+    if (error) {
+      console.error("updateReservationStatus error:", error.message);
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (err: any) {
+    return { ok: false, error: err.message || "Unknown error" };
+  }
 };

@@ -60,23 +60,21 @@ export function Reservation() {
     if (!validateForm()) return;
 
     setLoading(true);
-    try {
-      // Save to Supabase
-      await saveReservation(formData);
-      
-      // Simulate API call delay for UX
-      await new Promise(resolve => setTimeout(resolve, 1500));
+    setErrors({});
 
+    const result = await saveReservation(formData);
+
+    if (result.ok) {
       setSubmitted(true);
       setFormData({ name: "", phone: "", date: "", time: "", guests: "2", requests: "" });
 
       // Reset success message after 5 seconds
       setTimeout(() => setSubmitted(false), 5000);
-    } catch (error) {
-      setErrors({ submit: "Failed to submit reservation. Please try again." });
-    } finally {
-      setLoading(false);
+    } else {
+      setErrors({ submit: result.error || "Failed to submit reservation. Please try again." });
     }
+
+    setLoading(false);
   };
 
   return (

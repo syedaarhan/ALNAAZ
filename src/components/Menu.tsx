@@ -16,9 +16,14 @@ export function Menu() {
   useEffect(() => {
     const fetchMenu = async () => {
       setLoading(true);
-      const data = await getMenu();
-      setDishes(data);
-      setLoading(false);
+      try {
+        const data = await getMenu();
+        setDishes(data);
+      } catch (err) {
+        console.warn("Menu fetch failed:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchMenu();
   }, []);
@@ -56,7 +61,7 @@ export function Menu() {
     }
 
     return result;
-  }, [active, search, sortBy]);
+  }, [dishes, active, search, sortBy]);
 
   return (
     <section id="menu" className="relative py-28 md:py-36">
@@ -112,7 +117,7 @@ export function Menu() {
           <Filter className="h-4 w-4 text-muted-foreground" />
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortBy)}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
             aria-label="Sort menu items"
             className="rounded-full bg-card/60 border border-border/60 px-4 py-2 text-xs uppercase tracking-[0.1em] outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
           >

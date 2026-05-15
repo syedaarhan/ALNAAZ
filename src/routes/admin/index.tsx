@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { 
-  LayoutDashboard, 
   Utensils, 
   CalendarCheck, 
   LogOut, 
@@ -13,12 +12,15 @@ import {
   Clock,
   ChevronRight,
   TrendingUp,
-  Users
+  Users,
+  AlertTriangle,
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getMenu, saveMenu, getReservations, updateReservationStatus, Dish, Reservation, categories } from "@/lib/data";
+import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, Dish, Reservation, categories } from "@/lib/data";
 
-export const Route = createFileRoute("/admin/")({
+export const Route = createFileRoute("/admin/")(  {
   component: AdminDashboard,
 });
 
@@ -28,19 +30,48 @@ function AdminDashboard() {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const emptyDish: Partial<Dish> = {
+    name: "",
+    desc: "",
+    price: "",
+    cat: "Starters",
+    img: "",
+    priceNum: 0,
+    rating: 5.0
+  };
+  const [newDish, setNewDish] = useState<Partial<Dish>>(emptyDish);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setFetchError(null);
+    try {
+      const [menuData, resData] = await Promise.all([
+        getMenu(),
+        getReservations()
+      ]);
+      setDishes(menuData);
+      setReservations(resData);
+    } catch (err: any) {
+      console.error("Fetch Data Error:", err);
+      setFetchError(err.message || "Failed to load data.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const auth = localStorage.getItem("alnaaz_auth");
     if (auth !== "true") {
       navigate({ to: "/admin/login" });
+      return;
     }
-    
-    const fetchData = async () => {
-      const menuData = await getMenu();
-      const resData = await getReservations();
-      setDishes(menuData);
-      setReservations(resData);
-    };
     fetchData();
   }, [navigate]);
 
@@ -49,20 +80,159 @@ function AdminDashboard() {
     navigate({ to: "/admin/login" });
   };
 
+  const showSaveSuccess = (msg: string) => {
+    setSaveSuccess(msg);
+    setTimeout(() => setSaveSuccess(null), 3000);
+  };
+
   const deleteDish = async (id: string) => {
     const updated = dishes.filter(d => d.id !== id);
     setDishes(updated);
-    await saveMenu(updated);
+    const result = await deleteDishFromDb(id);
+    if (!result.ok) {
+      // Also try the upsert approach
+      await saveMenu(updated);
+    }
+    showSaveSuccess("Dish removed from menu");
+  };
+
+  const handleAddDish = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setSaveError(null);
+
+    const dish: Dish = {
+      ...newDish as Dish,
+      id: newDish.name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || Math.random().toString(36).substr(2, 9),
+      priceNum: parseInt(newDish.price?.replace(/[^0-9]/g, '') || "0"),
+      rating: newDish.rating || 5.0,
+      img: newDish.img || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=400&auto=format&fit=crop"
+    };
+    
+    const updated = [...dishes, dish];
+    setDishes(updated);
+    
+    const result = await saveMenu(updated);
+    setIsSaving(false);
+
+    if (!result.ok) {
+      setSaveError(result.error || "Failed to save. Changes are local only.");
+    }
+
+    setIsAdding(false);
+    setNewDish(emptyDish);
+    showSaveSuccess(`"${dish.name}" added to menu`);
   };
 
   const handleStatusChange = async (id: string, status: Reservation["status"]) => {
-    await updateReservationStatus(id, status);
-    const updated = await getReservations();
-    setReservations(updated);
+    // Optimistic update
+    setReservations(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+    
+    const result = await updateReservationStatus(id, status);
+    if (!result.ok) {
+      setSaveError(result.error || "Failed to update status.");
+      // Revert
+      const fresh = await getReservations();
+      setReservations(fresh);
+    } else {
+      showSaveSuccess(`Reservation ${status}`);
+    }
+  };
+
+  // Use startTransition to avoid blocking the UI when opening the modal
+  const openAddModal = () => {
+    startTransition(() => {
+      setIsAdding(true);
+    });
   };
 
   return (
     <div className="flex min-h-screen bg-background">
+      {/* Add Dish Modal */}
+      {isAdding && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-6" onClick={() => setIsAdding(false)}>
+          <div className="glass-strong w-full max-w-lg rounded-3xl p-8 luxury-shadow" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-display">New Culinary Creation</h2>
+              <button onClick={() => setIsAdding(false)} className="p-2 hover:bg-white/5 rounded-full text-muted-foreground"><XCircle className="h-6 w-6" /></button>
+            </div>
+
+            <form onSubmit={handleAddDish} className="space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Dish Name</label>
+                  <input 
+                    required
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all"
+                    placeholder="e.g. Royal Shahi Paneer"
+                    value={newDish.name}
+                    onChange={e => setNewDish({...newDish, name: e.target.value})}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Category</label>
+                  <select 
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all appearance-none"
+                    value={newDish.cat}
+                    onChange={e => setNewDish({...newDish, cat: e.target.value})}
+                  >
+                    {categories.filter(c => c !== "All").map(c => (
+                      <option key={c} value={c} className="bg-background">{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Price (₹)</label>
+                  <input 
+                    required
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all"
+                    placeholder="e.g. ₹ 450"
+                    value={newDish.price}
+                    onChange={e => setNewDish({...newDish, price: e.target.value})}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Description</label>
+                  <textarea 
+                    required
+                    rows={3}
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all resize-none"
+                    placeholder="Tell the story of this dish..."
+                    value={newDish.desc}
+                    onChange={e => setNewDish({...newDish, desc: e.target.value})}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Image URL <span className="text-muted-foreground/50">(optional)</span></label>
+                  <input 
+                    className="w-full rounded-2xl bg-white/5 border border-white/10 py-3 px-4 text-sm outline-none focus:border-primary transition-all"
+                    placeholder="https://images.unsplash.com/..."
+                    value={newDish.img}
+                    onChange={e => setNewDish({...newDish, img: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isSaving}
+                className="w-full group mt-4 flex items-center justify-center gap-3 rounded-full bg-primary py-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-all hover:gold-glow disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {isSaving ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>
+                ) : (
+                  <>Launch to Menu ✦</>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="w-64 border-r border-border bg-card/30 backdrop-blur-xl flex flex-col">
         <div className="p-8">
@@ -117,37 +287,85 @@ function AdminDashboard() {
           </div>
           
           <div className="flex items-center gap-4">
+            <button
+              onClick={fetchData}
+              disabled={isLoading}
+              className="glass px-4 py-2 rounded-full flex items-center gap-2 text-xs hover:bg-white/5 transition-all disabled:opacity-50"
+              title="Refresh data"
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
+              Refresh
+            </button>
             <div className="glass px-4 py-2 rounded-full flex items-center gap-2 text-xs">
-              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              Live Server
+              <span className={cn("h-2 w-2 rounded-full", fetchError ? "bg-red-500" : "bg-green-500 animate-pulse")} />
+              {fetchError ? "Offline" : "Live Server"}
             </div>
           </div>
         </header>
 
-        {activeTab === "menu" ? (
+        {/* Status Messages */}
+        {fetchError && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-sm text-amber-400">
+            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold">Database Unavailable — Showing Default Data</p>
+              <p className="mt-1 text-xs opacity-80">{fetchError}</p>
+              <p className="mt-2 text-xs opacity-60">Changes made here will be local only. To connect your database, ensure your Supabase project has 'menu' and 'reservations' tables with proper RLS policies.</p>
+            </div>
+          </div>
+        )}
+
+        {saveError && (
+          <div className="mb-6 flex items-center gap-3 rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400">
+            <XCircle className="h-5 w-5 shrink-0" />
+            <span>{saveError}</span>
+            <button onClick={() => setSaveError(null)} className="ml-auto p-1 hover:bg-white/5 rounded-full"><XCircle className="h-4 w-4" /></button>
+          </div>
+        )}
+
+        {saveSuccess && (
+          <div className="mb-6 flex items-center gap-3 rounded-2xl bg-green-500/10 border border-green-500/20 p-4 text-sm text-green-400">
+            <CheckCircle2 className="h-5 w-5 shrink-0" />
+            <span>{saveSuccess}</span>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-32">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : activeTab === "menu" ? (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
               <StatCard icon={Utensils} label="Total Dishes" value={dishes.length} />
-              <StatCard icon={TrendingUp} label="Popular Category" value="Biryani" />
-              <StatCard icon={Users} label="Active Guests" value="24" />
+              <StatCard icon={TrendingUp} label="Categories" value={new Set(dishes.map(d => d.cat)).size} />
+              <StatCard icon={Users} label="Reservations" value={reservations.length} />
             </div>
 
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-display">Dish Registry</h3>
               <button 
-                onClick={() => alert("Add Dish feature coming soon!")}
-                className="flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-primary hover:bg-primary/20 transition-all"
+                onClick={openAddModal}
+                disabled={isPending}
+                className="flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-primary hover:bg-primary/20 transition-all disabled:opacity-50"
               >
-                <Plus className="h-4 w-4" /> Add New Dish
+                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                Add New Dish
               </button>
             </div>
 
             <div className="grid gap-4">
-              {dishes.map((dish) => (
+              {dishes.length > 0 ? dishes.map((dish) => (
                 <div key={dish.id} className="glass-strong rounded-2xl p-4 flex items-center gap-6 group transition-all hover:border-primary/30">
-                  <img src={dish.img} className="h-16 w-16 rounded-xl object-cover" alt="" />
-                  <div className="flex-1">
-                    <h4 className="font-medium">{dish.name}</h4>
+                  {dish.img ? (
+                    <img src={dish.img} className="h-16 w-16 rounded-xl object-cover" alt={dish.name} />
+                  ) : (
+                    <div className="h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Utensils className="h-6 w-6 text-primary/40" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{dish.name}</h4>
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{dish.desc}</p>
                   </div>
                   <div className="text-right px-6 border-x border-border/50">
@@ -155,11 +373,14 @@ function AdminDashboard() {
                     <p className="text-[10px] uppercase tracking-tighter text-muted-foreground">{dish.cat}</p>
                   </div>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 hover:bg-white/5 rounded-full text-muted-foreground hover:text-primary"><Edit3 className="h-4 w-4" /></button>
-                    <button onClick={() => deleteDish(dish.id)} className="p-2 hover:bg-red-500/10 rounded-full text-muted-foreground hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => deleteDish(dish.id)} className="p-2 hover:bg-red-500/10 rounded-full text-muted-foreground hover:text-red-500" title="Delete"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="py-12 text-center text-muted-foreground italic">
+                  No dishes yet. Click "Add New Dish" to begin.
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -215,7 +436,6 @@ function AdminDashboard() {
                                 </button>
                               </>
                             )}
-                            <button className="p-2 rounded-full hover:bg-white/5 text-muted-foreground"><ChevronRight className="h-5 w-5" /></button>
                           </div>
                         </td>
                       </tr>

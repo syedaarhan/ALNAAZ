@@ -11,15 +11,23 @@ function AdminLogin() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    // Small delay to allow loading state to paint and avoid INP blocking
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     if (id === "alnaaz" && password === "alnaaz@kgf") {
       localStorage.setItem("alnaaz_auth", "true");
       navigate({ to: "/admin" });
     } else {
       setError("Invalid credentials. Access denied.");
+      setIsLoading(false);
     }
   };
 
@@ -56,9 +64,10 @@ function AdminLogin() {
                 <input
                   type="text"
                   required
+                  disabled={isLoading}
                   value={id}
                   onChange={(e) => setId(e.target.value)}
-                  className="w-full rounded-full bg-background/50 border border-border py-3 pl-12 pr-4 text-sm outline-none focus:border-primary transition-all"
+                  className="w-full rounded-full bg-background/50 border border-border py-3 pl-12 pr-4 text-sm outline-none focus:border-primary transition-all disabled:opacity-50"
                   placeholder="Enter ID"
                 />
               </div>
@@ -73,9 +82,10 @@ function AdminLogin() {
                 <input
                   type="password"
                   required
+                  disabled={isLoading}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-full bg-background/50 border border-border py-3 pl-12 pr-4 text-sm outline-none focus:border-primary transition-all"
+                  className="w-full rounded-full bg-background/50 border border-border py-3 pl-12 pr-4 text-sm outline-none focus:border-primary transition-all disabled:opacity-50"
                   placeholder="••••••••"
                 />
               </div>
@@ -84,9 +94,17 @@ function AdminLogin() {
 
           <button
             type="submit"
-            className="group mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-all hover:gold-glow"
+            disabled={isLoading}
+            className={cn(
+              "group mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-primary py-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-all hover:gold-glow disabled:opacity-70 disabled:cursor-not-allowed",
+              isLoading && "animate-pulse"
+            )}
           >
-            Authenticate ✦
+            {isLoading ? (
+              <>Authenticating...</>
+            ) : (
+              <>Authenticate ✦</>
+            )}
           </button>
         </form>
 
