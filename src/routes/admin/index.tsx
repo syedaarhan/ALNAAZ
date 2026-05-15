@@ -6,14 +6,11 @@ import {
   LogOut, 
   Plus, 
   Trash2, 
-  Edit3, 
   CheckCircle2, 
   XCircle, 
   Clock,
-  ChevronRight,
   TrendingUp,
   Users,
-  AlertTriangle,
   RefreshCw,
   Loader2
 } from "lucide-react";
@@ -32,7 +29,6 @@ function AdminDashboard() {
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -50,20 +46,13 @@ function AdminDashboard() {
 
   const fetchData = async () => {
     setIsLoading(true);
-    setFetchError(null);
-    try {
-      const [menuData, resData] = await Promise.all([
-        getMenu(),
-        getReservations()
-      ]);
-      setDishes(menuData);
-      setReservations(resData);
-    } catch (err: any) {
-      console.error("Fetch Data Error:", err);
-      setFetchError(err.message || "Failed to load data.");
-    } finally {
-      setIsLoading(false);
-    }
+    const [menuData, resData] = await Promise.all([
+      getMenu(),
+      getReservations()
+    ]);
+    setDishes(menuData);
+    setReservations(resData);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -297,23 +286,13 @@ function AdminDashboard() {
               Refresh
             </button>
             <div className="glass px-4 py-2 rounded-full flex items-center gap-2 text-xs">
-              <span className={cn("h-2 w-2 rounded-full", fetchError ? "bg-red-500" : "bg-green-500 animate-pulse")} />
-              {fetchError ? "Offline" : "Live Server"}
+              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              Live
             </div>
           </div>
         </header>
 
         {/* Status Messages */}
-        {fetchError && (
-          <div className="mb-6 flex items-start gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-sm text-amber-400">
-            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-semibold">Database Unavailable — Showing Default Data</p>
-              <p className="mt-1 text-xs opacity-80">{fetchError}</p>
-              <p className="mt-2 text-xs opacity-60">Changes made here will be local only. To connect your database, ensure your Supabase project has 'menu' and 'reservations' tables with proper RLS policies.</p>
-            </div>
-          </div>
-        )}
 
         {saveError && (
           <div className="mb-6 flex items-center gap-3 rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400">
