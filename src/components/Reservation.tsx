@@ -16,6 +16,8 @@ interface FormErrors {
   [key: string]: string;
 }
 
+import { saveReservation } from "@/lib/data";
+
 export function Reservation() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,15 +61,11 @@ export function Reservation() {
 
     setLoading(true);
     try {
-      // Simulate API call
+      // Save to local storage mock DB
+      saveReservation(formData);
+      
+      // Simulate API call delay for UX
       await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // In production, send to backend:
-      // const response = await fetch('/api/reservations', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
 
       setSubmitted(true);
       setFormData({ name: "", phone: "", date: "", time: "", guests: "2", requests: "" });
