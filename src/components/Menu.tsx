@@ -3,7 +3,7 @@ import { Star, Search, Filter, X, Info, Flame, Clock as ClockIcon } from "lucide
 import { cn } from "@/lib/utils";
 import { Drawer } from "vaul";
 import { motion, AnimatePresence } from "framer-motion";
-import { getMenu, Dish, categories } from "@/lib/data";
+import { getMenu, onMenuUpdate, Dish, categories } from "@/lib/data";
 
 export function Menu() {
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -15,7 +15,6 @@ export function Menu() {
 
   useEffect(() => {
     const fetchMenu = async () => {
-      setLoading(true);
       try {
         const data = await getMenu();
         setDishes(data);
@@ -27,21 +26,9 @@ export function Menu() {
     };
     fetchMenu();
 
-    // Auto-refresh when admin panel updates menu in another tab
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "alnaaz_menu") fetchMenu();
-    };
-    // Also refresh when user switches back to this tab
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") fetchMenu();
-    };
-
-    window.addEventListener("storage", onStorage);
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
+    // Auto-refresh when menu is updated (same tab, other tabs, or tab switch)
+    const unsubscribe = onMenuUpdate(() => fetchMenu());
+    return unsubscribe;
   }, []);
 
   const filtered = useMemo(() => {

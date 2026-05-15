@@ -17,7 +17,7 @@ import {
   Upload
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, Dish, Reservation, categories } from "@/lib/data";
+import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, compressImage, Dish, Reservation, categories } from "@/lib/data";
 
 export const Route = createFileRoute("/admin/")(  {
   component: AdminDashboard,
@@ -90,13 +90,16 @@ function AdminDashboard() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      setSaveError("Image must be under 2MB");
+    if (file.size > 5 * 1024 * 1024) {
+      setSaveError("Image must be under 5MB");
       return;
     }
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      setNewDish({ ...newDish, img: ev.target?.result as string });
+    reader.onload = async (ev) => {
+      const raw = ev.target?.result as string;
+      // Compress to ~50-100KB so it fits in localStorage
+      const compressed = await compressImage(raw);
+      setNewDish({ ...newDish, img: compressed });
     };
     reader.readAsDataURL(file);
   };
