@@ -152,14 +152,20 @@ export function Menu() {
                   className="hover-lift group glass-strong relative cursor-pointer overflow-hidden rounded-3xl"
                 >
                   <div className="relative h-60 overflow-hidden">
-                    <img
-                      src={d.img}
-                      alt={d.name}
-                      width={1024}
-                      height={1024}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-[1.2s] group-hover:scale-110"
-                    />
+                    {d.img ? (
+                      <img
+                        src={d.img}
+                        alt={d.name}
+                        width={1024}
+                        height={1024}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-[1.2s] group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <span className="text-4xl">🍽️</span>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent opacity-70" />
                     <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                       {d.chef && (
@@ -190,11 +196,11 @@ export function Menu() {
                         {Array.from({ length: 5 }).map((_, k) => (
                           <Star
                             key={k}
-                            className={cn("h-4 w-4", k < Math.round(d.rating) ? "fill-primary" : "opacity-30")}
+                            className={cn("h-4 w-4", k < Math.round(d.rating || 5) ? "fill-primary" : "opacity-30")}
                             aria-hidden="true"
                           />
                         ))}
-                        <span className="ml-2 text-xs text-muted-foreground">{d.rating.toFixed(1)}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">{(d.rating || 5).toFixed(1)}</span>
                       </div>
                       {d.prepTime && (
                         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -230,11 +236,17 @@ export function Menu() {
               <div className="mx-auto w-full max-w-2xl overflow-y-auto pb-8">
                 <div className="grid gap-8 md:grid-cols-2">
                   <div className="relative aspect-square overflow-hidden rounded-2xl luxury-shadow">
-                    <img 
-                      src={selectedDish.img} 
-                      alt={selectedDish.name} 
-                      className="h-full w-full object-cover"
-                    />
+                    {selectedDish.img ? (
+                      <img 
+                        src={selectedDish.img} 
+                        alt={selectedDish.name} 
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <span className="text-6xl">🍽️</span>
+                      </div>
+                    )}
                     <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                       {selectedDish.chef && (
                         <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary-foreground gold-glow">
@@ -260,10 +272,10 @@ export function Menu() {
                       <div className="flex items-center gap-2">
                         <div className="flex gap-0.5">
                           {Array.from({ length: 5 }).map((_, k) => (
-                            <Star key={k} className={cn("h-4 w-4", k < Math.round(selectedDish.rating) ? "fill-primary text-primary" : "text-muted-foreground/30")} />
+                            <Star key={k} className={cn("h-4 w-4", k < Math.round(selectedDish.rating || 5) ? "fill-primary text-primary" : "text-muted-foreground/30")} />
                           ))}
                         </div>
-                        <span className="text-sm font-medium">{selectedDish.rating}</span>
+                        <span className="text-sm font-medium">{(selectedDish.rating || 5).toFixed(1)}</span>
                       </div>
                       {selectedDish.prepTime && (
                         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
