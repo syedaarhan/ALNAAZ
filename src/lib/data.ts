@@ -269,6 +269,12 @@ export function compressImage(dataUrl: string): Promise<string> {
 
 // ========== MENU CRUD ==========
 
+// Map default dish IDs to their bundled images
+const defaultImageMap: Record<string, string> = {};
+defaultDishes.forEach((d) => {
+  defaultImageMap[d.id] = d.img;
+});
+
 export const getMenu = async (): Promise<Dish[]> => {
   // 1. In-memory cache (instant, always fresh in same session)
   if (_menuCache) return _menuCache;
@@ -278,10 +284,29 @@ export const getMenu = async (): Promise<Dish[]> => {
   if (dbOk) {
     try {
       const { data, error } = await supabase.from("menu").select("*").order("name");
-      if (!error && data && data.length > 0) {
-        _menuCache = data;
-        setLocal(LS_MENU, data);
-        return data;
+      if (!error && data) {
+        // Restore bundled images for default dishes (Supabase stores empty img)
+        const cloudDishes = data.map((d: Dish) => ({
+          ...d,
+          img: d.img || defaultImageMap[d.id] || "",
+        }));
+
+        // Merge any locally-added dishes that aren't in the cloud yet
+        const local = getLocal<Dish[]>(LS_MENU, []);
+        const cloudIds = new Set(cloudDishes.map((d: Dish) => d.id));
+        const localOnly = local.filter((d) => !cloudIds.has(d.id));
+
+        // Upload local-only dishes to cloud
+        if (localOnly.length > 0) {
+          try {
+            await supabase.from("menu").upsert(localOnly);
+          } catch { /* ignore */ }
+        }
+
+        const merged = [...cloudDishes, ...localOnly];
+        _menuCache = merged;
+        setLocal(LS_MENU, merged);
+        return merged;
       }
     } catch {
       /* fall through */
@@ -310,11 +335,17 @@ export const saveMenu = async (dishes: Dish[]): Promise<{ ok: boolean; error?: s
   // Save to localStorage
   setLocal(LS_MENU, dishes);
 
-  // Try cloud sync
+  // Try cloud sync — replace cloud data with our definitive list
   const dbOk = await checkDb();
   if (dbOk) {
     try {
-      const { error } = await supabase.from("menu").upsert(dishes);
+      // For Supabase, strip out bundled image paths (they're build-time assets)
+      const forCloud = dishes.map((d) => ({
+        ...d,
+        // Keep base64 data URLs, but strip bundled asset paths
+        img: d.img?.startsWith("data:") ? d.img : "",
+      }));
+      const { error } = await supabase.from("menu").upsert(forCloud);
       if (error) console.warn("Cloud menu save failed:", error.message);
     } catch {
       /* ignore */
