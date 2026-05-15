@@ -34,8 +34,14 @@ function AdminDashboard() {
     if (auth !== "true") {
       navigate({ to: "/admin/login" });
     }
-    setDishes(getMenu());
-    setReservations(getReservations());
+    
+    const fetchData = async () => {
+      const menuData = await getMenu();
+      const resData = await getReservations();
+      setDishes(menuData);
+      setReservations(resData);
+    };
+    fetchData();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -43,15 +49,16 @@ function AdminDashboard() {
     navigate({ to: "/admin/login" });
   };
 
-  const deleteDish = (id: string) => {
+  const deleteDish = async (id: string) => {
     const updated = dishes.filter(d => d.id !== id);
     setDishes(updated);
-    saveMenu(updated);
+    await saveMenu(updated);
   };
 
-  const handleStatusChange = (id: string, status: Reservation["status"]) => {
-    updateReservationStatus(id, status);
-    setReservations(getReservations());
+  const handleStatusChange = async (id: string, status: Reservation["status"]) => {
+    await updateReservationStatus(id, status);
+    const updated = await getReservations();
+    setReservations(updated);
   };
 
   return (

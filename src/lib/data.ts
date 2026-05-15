@@ -1,3 +1,4 @@
+import { supabase } from './supabase';
 import dishStarter from "@/assets/dish-starter.jpg";
 import dishBiryani from "@/assets/dish-biryani.jpg";
 import dishBbq from "@/assets/dish-bbq.jpg";
@@ -34,19 +35,23 @@ export const defaultDishes: Dish[] = [
 
 export const categories = ["All", "Starters", "Biryani", "BBQ", "Desserts", "Drinks"];
 
-// Simple Mock DB using LocalStorage
-export const getMenu = (): Dish[] => {
-  if (typeof window === "undefined") return defaultDishes;
-  const saved = localStorage.getItem("alnaaz_menu");
-  if (!saved) {
-    localStorage.setItem("alnaaz_menu", JSON.stringify(defaultDishes));
+// Fetch Menu from Supabase
+export const getMenu = async (): Promise<Dish[]> => {
+  try {
+    const { data, error } = await supabase.from('menu').select('*').order('name');
+    if (error) throw error;
+    if (!data || data.length === 0) return defaultDishes;
+    return data;
+  } catch (error) {
+    console.warn("Supabase fetch failed, using defaults:", error);
     return defaultDishes;
   }
-  return JSON.parse(saved);
 };
 
-export const saveMenu = (dishes: Dish[]) => {
-  localStorage.setItem("alnaaz_menu", JSON.stringify(dishes));
+export const saveMenu = async (dishes: Dish[]) => {
+  // In a real scenario, we'd upsert each dish. For now, we'll try to sync.
+  const { error } = await supabase.from('menu').upsert(dishes);
+  if (error) console.error("Error saving menu:", error);
 };
 
 export type Reservation = {
@@ -58,29 +63,32 @@ export type Reservation = {
   guests: string;
   requests: string;
   status: "pending" | "confirmed" | "cancelled";
-  createdAt: string;
+  created_at?: string; // Supabase uses snake_case by default
 };
 
-export const getReservations = (): Reservation[] => {
-  if (typeof window === "undefined") return [];
-  const saved = localStorage.getItem("alnaaz_reservations");
-  return saved ? JSON.parse(saved) : [];
+// Fetch Reservations from Supabase
+export const getReservations = async (): Promise<Reservation[]> => {
+  try {
+    const { data, error } = await supabase.from('reservations').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching reservations:", error);
+    return [];
+  }
 };
 
-export const saveReservation = (res: Omit<Reservation, "id" | "status" | "createdAt">) => {
-  const all = getReservations();
-  const newRes: Reservation = {
+export const saveReservation = async (res: Omit<Reservation, "id" | "status" | "created_at">) => {
+  const newRes = {
     ...res,
-    id: Math.random().toString(36).substr(2, 9),
     status: "pending",
-    createdAt: new Date().toISOString(),
   };
-  localStorage.setItem("alnaaz_reservations", JSON.stringify([newRes, ...all]));
-  return newRes;
+  const { data, error } = await supabase.from('reservations').insert([newRes]).select();
+  if (error) throw error;
+  return data?.[0];
 };
 
-export const updateReservationStatus = (id: string, status: Reservation["status"]) => {
-  const all = getReservations();
-  const updated = all.map(r => r.id === id ? { ...r, status } : r);
-  localStorage.setItem("alnaaz_reservations", JSON.stringify(updated));
+export const updateReservationStatus = async (id: string, status: Reservation["status"]) => {
+  const { error } = await supabase.from('reservations').update({ status }).eq('id', id);
+  if (error) console.error("Error updating reservation:", error);
 };

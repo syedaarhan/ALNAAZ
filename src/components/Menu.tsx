@@ -7,13 +7,20 @@ import { getMenu, Dish, categories } from "@/lib/data";
 
 export function Menu() {
   const [dishes, setDishes] = useState<Dish[]>([]);
+  const [loading, setLoading] = useState(true);
   const [active, setActive] = useState("All");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "rating">("featured");
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
 
   useEffect(() => {
-    setDishes(getMenu());
+    const fetchMenu = async () => {
+      setLoading(true);
+      const data = await getMenu();
+      setDishes(data);
+      setLoading(false);
+    };
+    fetchMenu();
   }, []);
 
   const filtered = useMemo(() => {

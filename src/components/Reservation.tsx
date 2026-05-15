@@ -61,8 +61,8 @@ export function Reservation() {
 
     setLoading(true);
     try {
-      // Save to local storage mock DB
-      saveReservation(formData);
+      // Save to Supabase
+      await saveReservation(formData);
       
       // Simulate API call delay for UX
       await new Promise(resolve => setTimeout(resolve, 1500));
