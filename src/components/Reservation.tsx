@@ -160,7 +160,7 @@ export function Reservation() {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full bg-transparent outline-none"
+                  className="w-full bg-transparent outline-none cursor-pointer"
                 />
               </div>
             </Field>
@@ -172,7 +172,7 @@ export function Reservation() {
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                  className="w-full bg-transparent outline-none"
+                  className="w-full bg-transparent outline-none cursor-pointer"
                 />
               </div>
             </Field>
@@ -234,16 +234,13 @@ export function Reservation() {
         }
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="time"]::-webkit-calendar-picker-indicator {
-          background: transparent;
-          bottom: 0;
-          color: transparent;
           cursor: pointer;
-          height: auto;
-          left: 0;
-          position: absolute;
-          right: 0;
-          top: 0;
-          width: auto;
+          opacity: 0.5;
+          filter: invert(1);
+        }
+        input[type="date"],
+        input[type="time"] {
+          color-scheme: dark;
         }
       `}</style>
     </section>
@@ -252,14 +249,14 @@ export function Reservation() {
 
 function Field({ label, children, className = "", error }: { label: string; children: React.ReactNode; className?: string; error?: string }) {
   return (
-    <label className={`block ${className}`}>
+    <div className={`block ${className}`}>
       <span className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
         {label}
         {error && <span className="ml-2 text-red-500">*</span>}
       </span>
       {children}
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-    </label>
+    </div>
   );
 }
 
