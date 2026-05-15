@@ -288,3 +288,16 @@ export const updateReservationStatus = async (id: string, status: Reservation["s
   }
   return { ok: true };
 };
+
+export const deleteReservation = async (id: string): Promise<{ ok: boolean; error?: string }> => {
+  _reservationsCache = (_reservationsCache || []).filter(r => r.id !== id);
+  setLocal(LS_RESERVATIONS, _reservationsCache);
+
+  const dbOk = await checkDb();
+  if (dbOk) {
+    try {
+      await supabase.from('reservations').delete().eq('id', id);
+    } catch { /* ignore */ }
+  }
+  return { ok: true };
+};

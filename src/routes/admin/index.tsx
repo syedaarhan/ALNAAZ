@@ -17,7 +17,7 @@ import {
   Upload
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, compressImage, clearCache, Dish, Reservation, categories } from "@/lib/data";
+import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, deleteReservation, compressImage, clearCache, Dish, Reservation, categories } from "@/lib/data";
 
 export const Route = createFileRoute("/admin/")(  {
   component: AdminDashboard,
@@ -158,6 +158,18 @@ function AdminDashboard() {
       setReservations(fresh);
     } else {
       showSaveSuccess(`Reservation ${status}`);
+    }
+  };
+
+  const handleDeleteReservation = async (id: string) => {
+    if (!confirm("Delete this reservation?")) return;
+    setReservations(prev => prev.filter(r => r.id !== id));
+    const result = await deleteReservation(id);
+    if (!result.ok) {
+      setSaveError("Failed to delete reservation.");
+      loadData();
+    } else {
+      showSaveSuccess("Reservation deleted");
     }
   };
 
@@ -466,6 +478,13 @@ function AdminDashboard() {
                                 </button>
                               </>
                             )}
+                            <button 
+                              onClick={() => handleDeleteReservation(res.id)}
+                              className="p-2 rounded-full hover:bg-red-500/10 text-red-400/50 hover:text-red-500 transition-all"
+                              title="Delete reservation"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
                           </div>
                         </td>
                       </tr>
