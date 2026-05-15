@@ -17,7 +17,7 @@ import {
   Upload
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, compressImage, Dish, Reservation, categories } from "@/lib/data";
+import { getMenu, saveMenu, deleteDishFromDb, getReservations, updateReservationStatus, compressImage, clearCache, Dish, Reservation, categories } from "@/lib/data";
 
 export const Route = createFileRoute("/admin/")(  {
   component: AdminDashboard,
@@ -48,6 +48,7 @@ function AdminDashboard() {
 
   const fetchData = async () => {
     setIsLoading(true);
+    clearCache(); // Clear stale in-memory cache so we get fresh data
     const [menuData, resData] = await Promise.all([
       getMenu(),
       getReservations()

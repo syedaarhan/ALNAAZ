@@ -39,7 +39,14 @@ export const categories = ["All", "Starters", "Biryani", "BBQ", "Desserts", "Dri
 let _menuCache: Dish[] | null = null;
 let _reservationsCache: Reservation[] | null = null;
 
-// Custom event name for same-tab notifications
+/** Clear all caches — use when refreshing data */
+export function clearCache() {
+  _menuCache = null;
+  _reservationsCache = null;
+  _dbReady = null;
+}
+
+// Custom event names for same-tab notifications
 const MENU_UPDATED_EVENT = "alnaaz_menu_updated";
 const RESERVATIONS_UPDATED_EVENT = "alnaaz_reservations_updated";
 
